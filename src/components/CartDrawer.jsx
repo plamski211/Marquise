@@ -68,7 +68,11 @@ export default function CartDrawer() {
 
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                         <h4 style={{ fontFamily: 'var(--serif)', fontSize: '0.95rem', fontWeight: 400, marginBottom: '3px' }}>{item.name}</h4>
-                        <p style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '3px' }}>{item.size} / {item.color}</p>
+                        {(item.size || item.color) && (
+                          <p style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '3px' }}>
+                            {[item.size, item.color].filter(Boolean).join(' / ')}
+                          </p>
+                        )}
                         <p style={{ fontSize: '0.82rem', fontWeight: 400, marginBottom: '10px' }}>${item.price}</p>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>

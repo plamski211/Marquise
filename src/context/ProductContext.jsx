@@ -26,7 +26,7 @@ export function ProductProvider({ children }) {
     const newProduct = {
       ...product,
       id: 'p' + Date.now(),
-      isNew: true,
+      isNew: product.isNew !== undefined ? product.isNew : true,
     };
     setProducts(prev => [newProduct, ...prev]);
     return newProduct;

@@ -38,6 +38,8 @@ export default function ProductDetail() {
 
   const hasImages = product.images && product.images.length > 0;
   const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
+  const showSizes = product.sizes?.length > 0 && product.sizes[0] !== 'One Size';
+  const showColors = product.colors?.length > 0;
 
   return (
     <div style={{ paddingTop: 'var(--nav-h)' }}>
@@ -59,13 +61,7 @@ export default function ProductDetail() {
       </div>
 
       {/* Product */}
-      <div className="container" style={{
-        display: 'grid',
-        gridTemplateColumns: '1.1fr 1fr',
-        gap: '80px',
-        padding: '24px 48px 120px',
-        alignItems: 'start',
-      }}>
+      <div className="container pdp-grid">
         {/* Image */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
           <div style={{
@@ -120,24 +116,26 @@ export default function ProductDetail() {
             ${product.price}
           </p>
 
-          <p style={{
-            fontSize: '0.88rem',
-            fontWeight: 300,
-            lineHeight: 1.75,
-            color: 'var(--text-mid)',
-            marginBottom: '40px',
-            maxWidth: '480px',
-          }}>
-            {product.description}
-          </p>
+          {product.description && (
+            <p style={{
+              fontSize: '0.88rem',
+              fontWeight: 300,
+              lineHeight: 1.75,
+              color: 'var(--text-mid)',
+              marginBottom: '40px',
+              maxWidth: '480px',
+            }}>
+              {product.description}
+            </p>
+          )}
 
           {/* Color */}
-          {product.colors?.length > 0 && (
+          {showColors && (
             <div style={{ marginBottom: '28px' }}>
               <p className="label" style={{ marginBottom: '12px' }}>
                 Color — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedColor}</span>
               </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {product.colors.map(c => (
                   <button key={c} onClick={() => setSelectedColor(c)} style={{
                     padding: '9px 20px',
@@ -153,7 +151,7 @@ export default function ProductDetail() {
           )}
 
           {/* Size */}
-          {product.sizes?.length > 0 && product.sizes[0] !== 'One Size' && (
+          {showSizes && (
             <div style={{ marginBottom: '36px' }}>
               <p className="label" style={{ marginBottom: '12px' }}>
                 Size — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedSize}</span>
@@ -197,7 +195,7 @@ export default function ProductDetail() {
         <section style={{ padding: '80px 0 120px', background: 'var(--bg-alt)' }}>
           <div className="container">
             <h2 style={{ marginBottom: '48px' }}>You May Also Like</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(related.length, 4)}, 1fr)`, gap: '24px 20px' }}>
+            <div className="related-grid">
               {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>
           </div>
@@ -205,11 +203,24 @@ export default function ProductDetail() {
       )}
 
       <style>{`
-        @media (max-width: 1024px) {
-          .container[style*="grid-template-columns: 1.1fr 1fr"] { grid-template-columns: 1fr !important; gap: 40px !important; }
+        .pdp-grid {
+          display: grid;
+          grid-template-columns: 1.1fr 1fr;
+          gap: 80px;
+          padding: 24px 48px 120px;
+          align-items: start;
         }
-        @media (max-width: 640px) {
-          .container > div[style*="grid-template-columns: repeat("] { grid-template-columns: repeat(2, 1fr) !important; }
+        .related-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px 20px;
+        }
+        @media (max-width: 1024px) {
+          .pdp-grid { grid-template-columns: 1fr; gap: 40px; }
+        }
+        @media (max-width: 768px) {
+          .pdp-grid { padding: 16px 20px 80px; }
+          .related-grid { grid-template-columns: repeat(2, 1fr); }
         }
       `}</style>
     </div>

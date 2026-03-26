@@ -13,6 +13,7 @@ const emptyProduct = {
   sizes: [],
   colors: [],
   featured: false,
+  isNew: false,
   gradient: 'linear-gradient(145deg, #E8E2DA 0%, #D4CCC0 100%)',
   images: [],
 };
@@ -44,6 +45,7 @@ export default function Admin() {
     setTimeout(() => setToast(''), 2400);
   };
 
+  /* ── Image handling ── */
   const handleImageUpload = useCallback((files) => {
     Array.from(files).forEach(file => {
       if (!file.type.startsWith('image/')) return;
@@ -84,6 +86,22 @@ export default function Admin() {
     }));
   };
 
+  const moveImage = (fromIndex, toIndex) => {
+    if (toIndex < 0 || toIndex >= form.images.length) return;
+    setForm(prev => {
+      const images = [...prev.images];
+      const [moved] = images.splice(fromIndex, 1);
+      images.splice(toIndex, 0, moved);
+      return { ...prev, images };
+    });
+  };
+
+  const setAsMainImage = (index) => {
+    if (index === 0) return;
+    moveImage(index, 0);
+  };
+
+  /* ── Size & Color ── */
   const toggleSize = (size) => {
     setForm(prev => ({
       ...prev,
@@ -111,6 +129,7 @@ export default function Admin() {
     }));
   };
 
+  /* ── Form submit ── */
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!form.name || !form.price) {
@@ -141,11 +160,12 @@ export default function Admin() {
       name: product.name,
       price: product.price.toString(),
       category: product.category,
-      description: product.description,
-      sizes: [...product.sizes],
-      colors: [...product.colors],
-      featured: product.featured,
-      gradient: product.gradient,
+      description: product.description || '',
+      sizes: [...(product.sizes || [])],
+      colors: [...(product.colors || [])],
+      featured: product.featured || false,
+      isNew: product.isNew || false,
+      gradient: product.gradient || emptyProduct.gradient,
       images: [...(product.images || [])],
     });
     setEditingId(product.id);
@@ -338,61 +358,181 @@ export default function Admin() {
                       type="file"
                       accept="image/*"
                       multiple
-                      onChange={(e) => handleImageUpload(e.target.files)}
+                      onChange={(e) => { handleImageUpload(e.target.files); e.target.value = ''; }}
                       style={{ display: 'none' }}
                     />
                   </div>
 
-                  {/* Image previews */}
+                  {/* Image previews with reordering */}
                   {form.images.length > 0 && (
-                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                      {form.images.map((img, i) => (
-                        <div key={i} style={{
-                          position: 'relative',
-                          width: '80px',
-                          height: '100px',
-                          overflow: 'hidden',
-                          border: '1px solid var(--border)',
-                        }}>
-                          <img src={img} alt="" style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                          }} />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(i)}
-                            style={{
+                    <>
+                      <p style={{
+                        fontSize: '0.7rem',
+                        fontWeight: 300,
+                        color: 'var(--text-light)',
+                        marginBottom: '10px',
+                      }}>
+                        First image is the main thumbnail. Use arrows to reorder.
+                      </p>
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        {form.images.map((img, i) => (
+                          <div key={i} style={{
+                            position: 'relative',
+                            width: '100px',
+                            height: '130px',
+                            overflow: 'hidden',
+                            border: i === 0 ? '2px solid var(--accent)' : '1px solid var(--border)',
+                            flexShrink: 0,
+                          }}>
+                            <img src={img} alt="" style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                            }} />
+
+                            {/* "Main" badge on first image */}
+                            {i === 0 && (
+                              <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                background: 'var(--accent)',
+                                color: '#fff',
+                                fontSize: '0.5rem',
+                                fontWeight: 600,
+                                letterSpacing: '0.15em',
+                                textTransform: 'uppercase',
+                                textAlign: 'center',
+                                padding: '3px 0',
+                              }}>
+                                Main
+                              </div>
+                            )}
+
+                            {/* Reorder & action buttons */}
+                            <div style={{
                               position: 'absolute',
-                              top: '4px',
-                              right: '4px',
-                              width: '20px',
-                              height: '20px',
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              display: 'flex',
+                              background: 'rgba(0,0,0,0.65)',
+                            }}>
+                              {/* Move left */}
+                              <button
+                                type="button"
+                                onClick={() => moveImage(i, i - 1)}
+                                disabled={i === 0}
+                                style={{
+                                  flex: 1,
+                                  padding: '5px 0',
+                                  color: i === 0 ? 'rgba(255,255,255,0.2)' : '#fff',
+                                  fontSize: '0.7rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                                title="Move left"
+                              >
+                                ‹
+                              </button>
+
+                              {/* Set as main */}
+                              {i !== 0 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setAsMainImage(i)}
+                                  style={{
+                                    flex: 1,
+                                    padding: '5px 0',
+                                    color: '#fff',
+                                    fontSize: '0.5rem',
+                                    fontWeight: 500,
+                                    letterSpacing: '0.08em',
+                                    textTransform: 'uppercase',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    borderLeft: '1px solid rgba(255,255,255,0.15)',
+                                    borderRight: '1px solid rgba(255,255,255,0.15)',
+                                  }}
+                                  title="Set as main image"
+                                >
+                                  Main
+                                </button>
+                              )}
+
+                              {/* Move right */}
+                              <button
+                                type="button"
+                                onClick={() => moveImage(i, i + 1)}
+                                disabled={i === form.images.length - 1}
+                                style={{
+                                  flex: 1,
+                                  padding: '5px 0',
+                                  color: i === form.images.length - 1 ? 'rgba(255,255,255,0.2)' : '#fff',
+                                  fontSize: '0.7rem',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                }}
+                                title="Move right"
+                              >
+                                ›
+                              </button>
+                            </div>
+
+                            {/* Remove button */}
+                            <button
+                              type="button"
+                              onClick={() => removeImage(i)}
+                              style={{
+                                position: 'absolute',
+                                top: i === 0 ? '22px' : '4px',
+                                right: '4px',
+                                width: '20px',
+                                height: '20px',
+                                borderRadius: '50%',
+                                background: 'rgba(0,0,0,0.6)',
+                                color: 'white',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '0.7rem',
+                                lineHeight: 1,
+                              }}
+                            >
+                              &times;
+                            </button>
+
+                            {/* Position number */}
+                            <div style={{
+                              position: 'absolute',
+                              top: i === 0 ? '22px' : '4px',
+                              left: '4px',
+                              width: '18px',
+                              height: '18px',
                               borderRadius: '50%',
-                              background: 'rgba(0,0,0,0.6)',
-                              color: 'white',
+                              background: 'rgba(0,0,0,0.5)',
+                              color: '#fff',
+                              fontSize: '0.55rem',
+                              fontWeight: 600,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              fontSize: '0.7rem',
-                              lineHeight: 1,
-                            }}
-                          >
-                            &times;
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                            }}>
+                              {i + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
                   )}
                 </div>
 
                 {/* Name & Price row */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '2fr 1fr',
-                  gap: '24px',
-                  marginBottom: '24px',
-                }}>
+                <div className="admin-row-2">
                   <div>
                     <label className="input-label">Name</label>
                     <input
@@ -418,39 +558,43 @@ export default function Admin() {
                   </div>
                 </div>
 
-                {/* Category & Featured */}
+                {/* Category */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label className="input-label">Category</label>
+                  <select
+                    className="select"
+                    value={form.category}
+                    onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
+                  >
+                    {CATEGORIES.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Toggles: Featured & New */}
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '24px',
+                  display: 'flex',
+                  gap: '32px',
                   marginBottom: '24px',
                 }}>
-                  <div>
-                    <label className="input-label">Category</label>
-                    <select
-                      className="select"
-                      value={form.category}
-                      onChange={e => setForm(p => ({ ...p, category: e.target.value }))}
-                    >
-                      {CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '14px' }}>
-                    <label style={{
+                  {[
+                    { key: 'featured', label: 'Featured piece' },
+                    { key: 'isNew', label: 'New arrival' },
+                  ].map(({ key, label }) => (
+                    <label key={key} style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: '10px',
                       cursor: 'pointer',
                     }}>
                       <div
-                        onClick={() => setForm(p => ({ ...p, featured: !p.featured }))}
+                        onClick={() => setForm(p => ({ ...p, [key]: !p[key] }))}
                         style={{
                           width: '20px',
                           height: '20px',
-                          border: `1.5px solid ${form.featured ? 'var(--accent)' : 'var(--border)'}`,
-                          background: form.featured ? 'var(--accent)' : 'transparent',
+                          border: `1.5px solid ${form[key] ? 'var(--accent)' : 'var(--border)'}`,
+                          background: form[key] ? 'var(--accent)' : 'transparent',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
@@ -458,7 +602,7 @@ export default function Admin() {
                           cursor: 'pointer',
                         }}
                       >
-                        {form.featured && (
+                        {form[key] && (
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
                             <polyline points="20,6 9,17 4,12" />
                           </svg>
@@ -469,10 +613,10 @@ export default function Admin() {
                         fontWeight: 300,
                         color: 'var(--text-mid)',
                       }}>
-                        Featured piece
+                        {label}
                       </span>
                     </label>
-                  </div>
+                  ))}
                 </div>
 
                 {/* Description */}
@@ -528,7 +672,7 @@ export default function Admin() {
                     <button
                       type="button"
                       onClick={addColor}
-                      className="btn btn-sm btn-outline"
+                      className="btn btn-sm"
                       style={{ padding: '10px 20px' }}
                     >
                       Add
@@ -595,10 +739,10 @@ export default function Admin() {
 
                 {/* Submit */}
                 <div style={{ display: 'flex', gap: '12px' }}>
-                  <button type="submit" className="btn btn-primary">
+                  <button type="submit" className="btn btn-filled">
                     {editingId ? 'Update Piece' : 'Add to Collection'}
                   </button>
-                  <button type="button" onClick={cancelEdit} className="btn btn-outline">
+                  <button type="button" onClick={cancelEdit} className="btn">
                     Cancel
                   </button>
                 </div>
@@ -632,22 +776,14 @@ export default function Admin() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.03 }}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '60px 1fr 100px 100px 120px',
-                  gap: '20px',
-                  alignItems: 'center',
-                  padding: '16px 20px',
-                  background: '#fff',
-                  border: '1px solid var(--border)',
-                  marginBottom: '-1px',
-                }}
+                className="admin-row"
               >
                 {/* Thumbnail */}
                 <div style={{
                   width: '52px',
                   height: '68px',
                   overflow: 'hidden',
+                  flexShrink: 0,
                 }}>
                   {product.images?.[0] ? (
                     <img src={product.images[0]} alt="" style={{
@@ -665,7 +801,7 @@ export default function Admin() {
                 </div>
 
                 {/* Info */}
-                <div>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <h4 style={{
                     fontFamily: 'var(--serif)',
                     fontSize: '1rem',
@@ -683,29 +819,33 @@ export default function Admin() {
                     {product.category}
                     {product.isNew && ' · New'}
                     {product.featured && ' · Featured'}
+                    {product.images?.length > 0 && ` · ${product.images.length} image${product.images.length > 1 ? 's' : ''}`}
                   </p>
                 </div>
 
                 {/* Price */}
-                <span style={{
+                <span className="admin-col-hide" style={{
                   fontSize: '0.9rem',
                   fontWeight: 300,
                   color: 'var(--text)',
+                  width: '80px',
+                  textAlign: 'right',
                 }}>
                   ${product.price}
                 </span>
 
                 {/* Sizes */}
-                <span style={{
+                <span className="admin-col-hide-sm" style={{
                   fontSize: '0.72rem',
                   fontWeight: 300,
                   color: 'var(--text-light)',
+                  width: '100px',
                 }}>
                   {product.sizes?.join(', ') || '—'}
                 </span>
 
                 {/* Actions */}
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <button
                     onClick={() => handleEdit(product)}
                     style={{
@@ -751,22 +891,29 @@ export default function Admin() {
       </div>
 
       <style>{`
+        .admin-row-2 {
+          display: grid;
+          grid-template-columns: 2fr 1fr;
+          gap: 24px;
+          margin-bottom: 24px;
+        }
+        .admin-row {
+          display: flex;
+          gap: 20px;
+          align-items: center;
+          padding: 16px 20px;
+          background: #fff;
+          border: 1px solid var(--border);
+          margin-bottom: -1px;
+        }
         @media (max-width: 1024px) {
-          form > div[style*="grid-template-columns: 2fr 1fr"],
-          form > div[style*="grid-template-columns: 1fr 1fr"] {
-            grid-template-columns: 1fr !important;
-          }
+          .admin-row-2 { grid-template-columns: 1fr; }
         }
         @media (max-width: 768px) {
-          div[style*="grid-template-columns: 60px 1fr 100px 100px 120px"] {
-            grid-template-columns: 52px 1fr auto !important;
-          }
-          div[style*="grid-template-columns: 60px 1fr 100px 100px 120px"] > span:nth-child(4) {
-            display: none;
-          }
-          div[style*="grid-template-columns: 60px 1fr 100px 100px 120px"] > span:nth-child(3) {
-            display: none;
-          }
+          .admin-col-hide-sm { display: none; }
+        }
+        @media (max-width: 540px) {
+          .admin-col-hide { display: none; }
         }
       `}</style>
     </div>
