@@ -19,7 +19,11 @@ export function ProductProvider({ children }) {
   const [products, setProducts] = useState(loadProducts);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    } catch {
+      // localStorage quota exceeded (e.g. too many base64 images)
+    }
   }, [products]);
 
   const addProduct = useCallback((product) => {

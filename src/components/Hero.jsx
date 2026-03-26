@@ -4,24 +4,30 @@ import { Link } from 'react-router-dom';
 
 const slides = [
   {
-    bg: 'linear-gradient(160deg, #0C0B0A 0%, #1E1C1A 40%, #0C0B0A 100%)',
-    accent: 'radial-gradient(ellipse 70% 50% at 65% 40%, rgba(184,149,106,0.06) 0%, transparent 70%)',
+    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1920&q=85',
+    imageFocus: '50% 20%',
+    fallbackBg: 'linear-gradient(160deg, #0C0B0A 0%, #1E1C1A 40%, #0C0B0A 100%)',
+    overlay: 'linear-gradient(105deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 50%, rgba(0,0,0,0.18) 100%)',
     label: '01',
     title: ['Spring', 'Summer'],
     subtitle: '2026 Collection',
     align: 'left',
   },
   {
-    bg: 'linear-gradient(160deg, #1B2838 0%, #263A50 40%, #1B2838 100%)',
-    accent: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(100,150,200,0.04) 0%, transparent 70%)',
+    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1920&q=85',
+    imageFocus: '50% 25%',
+    fallbackBg: 'linear-gradient(160deg, #1B2838 0%, #263A50 40%, #1B2838 100%)',
+    overlay: 'linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.52) 55%, rgba(0,0,0,0.72) 100%)',
     label: '02',
     title: ['The Art of', 'Dressing'],
     subtitle: 'Curated Elegance',
     align: 'center',
   },
   {
-    bg: 'linear-gradient(160deg, #2A2420 0%, #3A3430 40%, #1A1614 100%)',
-    accent: 'radial-gradient(ellipse 60% 50% at 30% 60%, rgba(184,149,106,0.06) 0%, transparent 70%)',
+    image: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1920&q=85',
+    imageFocus: '50% 30%',
+    fallbackBg: 'linear-gradient(160deg, #2A2420 0%, #3A3430 40%, #1A1614 100%)',
+    overlay: 'linear-gradient(255deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 50%, rgba(0,0,0,0.18) 100%)',
     label: '03',
     title: ['Crafted', 'By Hand'],
     subtitle: 'Artisan Excellence',
@@ -80,31 +86,36 @@ export default function Hero() {
       <AnimatePresence mode="sync">
         <motion.div
           key={current}
-          initial={{ opacity: 0, scale: 1.08 }}
+          initial={{ opacity: 0, scale: 1.06 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 1.6, ease: [0.16, 1, 0.3, 1] }}
-          style={{ position: 'absolute', inset: 0 }}
+          transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
+          style={{ position: 'absolute', inset: 0, background: slide.fallbackBg }}
         >
-          <motion.div style={{ width: '100%', height: '100%', background: slide.bg, scale: bgScale }}>
-            <div style={{ position: 'absolute', inset: 0, background: slide.accent }} />
+          <motion.div style={{ width: '100%', height: '100%', position: 'relative', scale: bgScale }}>
+            <img
+              src={slide.image}
+              alt=""
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: slide.imageFocus,
+              }}
+            />
+            {/* Directional overlay for text legibility */}
+            <div style={{ position: 'absolute', inset: 0, background: slide.overlay }} />
+            {/* Bottom gradient for progress bars */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 30%)',
+            }} />
           </motion.div>
         </motion.div>
       </AnimatePresence>
-
-      {/* Subtle grid texture */}
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          zIndex: 1,
-          opacity: 0.015,
-          backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-          backgroundSize: '80px 80px',
-          pointerEvents: 'none',
-        }}
-      />
 
       {/* Content */}
       <AnimatePresence mode="wait">
