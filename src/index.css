@@ -3,7 +3,6 @@
    ═══════════════════════════════════════════════ */
 
 :root {
-  /* Pared-back palette — near-white, near-black, one quiet accent */
   --bg: #FEFEFE;
   --bg-alt: #F6F5F3;
   --bg-dark: #111111;
@@ -27,6 +26,7 @@
   --nav-h: 72px;
   --max-w: 1400px;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --px: 48px;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -53,17 +53,17 @@ button { border: none; background: none; cursor: pointer; font-family: inherit; 
 input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; border: none; outline: none; background: none; }
 ul, ol { list-style: none; }
 
-/* ── Typography — bold and confident ── */
+/* ── Typography ── */
 h1, h2, h3, h4 {
   font-family: var(--serif);
   font-weight: 300;
   line-height: 1.05;
 }
 
-h1 { font-size: clamp(3rem, 7vw, 6.5rem); letter-spacing: -0.03em; }
-h2 { font-size: clamp(2.2rem, 4.5vw, 3.8rem); letter-spacing: -0.02em; }
-h3 { font-size: clamp(1.4rem, 2.5vw, 2rem); }
-h4 { font-size: clamp(1.05rem, 1.3vw, 1.25rem); font-weight: 400; }
+h1 { font-size: clamp(2.4rem, 7vw, 6.5rem); letter-spacing: -0.03em; }
+h2 { font-size: clamp(1.8rem, 4.5vw, 3.8rem); letter-spacing: -0.02em; }
+h3 { font-size: clamp(1.3rem, 2.5vw, 2rem); }
+h4 { font-size: clamp(1rem, 1.3vw, 1.25rem); font-weight: 400; }
 
 p { font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
 
@@ -71,11 +71,7 @@ p { font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
   width: 100%;
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: 0 48px;
-}
-
-@media (max-width: 768px) {
-  .container { padding: 0 20px; }
+  padding: 0 var(--px);
 }
 
 /* ── Micro label ── */
@@ -88,7 +84,7 @@ p { font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
   color: var(--text-light);
 }
 
-/* ── Buttons — understated ── */
+/* ── Buttons ── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -114,10 +110,7 @@ p { font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
   background: var(--text);
   color: var(--text-inv);
 }
-
-.btn-filled:hover {
-  background: #333;
-}
+.btn-filled:hover { background: #333; }
 
 .btn-sm { padding: 10px 28px; font-size: 0.6rem; }
 .btn-lg { padding: 18px 52px; }
@@ -227,9 +220,26 @@ p { font-size: 0.92rem; line-height: 1.7; color: var(--text-mid); }
   opacity: 0;
   transition: all 0.4s var(--ease);
   pointer-events: none;
+  white-space: nowrap;
 }
 .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 /* ── Custom cursor ── */
 .cc-cursor, .cc-cursor * { cursor: none !important; }
 .cc-cursor input, .cc-cursor textarea, .cc-cursor select { cursor: none !important; }
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  :root { --px: 20px; --nav-h: 60px; }
+  .btn { padding: 13px 28px; }
+  .btn-lg { padding: 16px 36px; }
+  .toast { bottom: 16px; padding: 12px 24px; }
+}
+
+@media (max-width: 480px) {
+  :root { --px: 16px; }
+  h1 { font-size: clamp(2rem, 8vw, 3rem); }
+}

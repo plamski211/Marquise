@@ -260,7 +260,7 @@ export default function Admin() {
         </div>
       </section>
 
-      <div className="container" style={{ padding: '40px 48px 120px' }}>
+      <div className="container" style={{ padding: '40px var(--px) 120px' }}>
         {/* Product Form */}
         <AnimatePresence>
           {showForm && (
@@ -273,7 +273,7 @@ export default function Admin() {
             >
               <form onSubmit={handleSubmit} style={{
                 background: '#fff',
-                padding: '40px',
+                padding: 'clamp(20px, 4vw, 40px)',
                 border: '1px solid var(--border)',
               }}>
                 <div style={{
@@ -378,8 +378,8 @@ export default function Admin() {
                         {form.images.map((img, i) => (
                           <div key={i} style={{
                             position: 'relative',
-                            width: '100px',
-                            height: '130px',
+                            width: 'clamp(72px, 14vw, 100px)',
+                            height: 'clamp(94px, 18vw, 130px)',
                             overflow: 'hidden',
                             border: i === 0 ? '2px solid var(--accent)' : '1px solid var(--border)',
                             flexShrink: 0,
@@ -914,6 +914,7 @@ export default function Admin() {
         }
         @media (max-width: 540px) {
           .admin-col-hide { display: none; }
+          .admin-row { padding: 12px 14px; gap: 12px; }
         }
       `}</style>
     </div>

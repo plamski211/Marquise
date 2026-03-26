@@ -76,8 +76,8 @@ export default function HorizontalGallery({ products }) {
         style={{
           display: 'flex',
           gap: 'clamp(16px, 2vw, 28px)',
-          paddingLeft: '48px',
-          paddingRight: '120px',
+          paddingLeft: 'var(--px)',
+          paddingRight: 'clamp(60px, 10vw, 120px)',
           cursor: isDragging ? 'grabbing' : 'grab',
           userSelect: 'none',
         }}
@@ -227,14 +227,7 @@ export default function HorizontalGallery({ products }) {
         })}
       </motion.div>
 
-      <style>{`
-        @media (max-width: 768px) {
-          section > div:last-of-type {
-            padding-left: 20px !important;
-            padding-right: 60px !important;
-          }
-        }
-      `}</style>
+      {/* responsive padding now handled by var(--px) */}
     </section>
   );
 }

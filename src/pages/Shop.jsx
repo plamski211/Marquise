@@ -51,14 +51,8 @@ export default function Shop() {
         background: 'rgba(254,254,254,0.95)',
         backdropFilter: 'blur(12px)',
       }}>
-        <div className="container" style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: '50px',
-          overflowX: 'auto',
-        }}>
-          <div style={{ display: 'flex', gap: '28px', flexShrink: 0 }}>
+        <div className="container shop-filter-bar">
+          <div className="shop-filter-cats">
             {allCategories.map(cat => (
               <button key={cat} onClick={() => setActiveCategory(cat)} style={{
                 fontFamily: 'var(--sans)',
@@ -94,7 +88,7 @@ export default function Shop() {
             ))}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+          <div className="shop-filter-sort">
             <span style={{ fontSize: '0.72rem', fontWeight: 300, color: 'var(--text-light)' }}>
               {displayProducts.length}
             </span>
@@ -130,11 +124,7 @@ export default function Shop() {
               </p>
             </div>
           ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '32px 20px',
-            }}>
+            <div className="shop-grid">
               {displayProducts.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} />
               ))}
@@ -144,14 +134,41 @@ export default function Shop() {
       </section>
 
       <style>{`
+        .shop-filter-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          height: 50px;
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        .shop-filter-bar::-webkit-scrollbar { display: none; }
+        .shop-filter-cats {
+          display: flex;
+          gap: 28px;
+          flex-shrink: 0;
+        }
+        .shop-filter-sort {
+          display: flex;
+          align-items: center;
+          gap: 20px;
+          flex-shrink: 0;
+        }
+        .shop-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 32px 20px;
+        }
         @media (max-width: 1024px) {
-          .container > div[style*="grid-template-columns: repeat(4"] {
-            grid-template-columns: repeat(2, 1fr) !important;
-          }
+          .shop-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+          .shop-filter-cats { gap: 18px; }
         }
         @media (max-width: 540px) {
-          .container > div[style*="grid-template-columns: repeat("] {
-            grid-template-columns: 1fr !important;
+          .shop-grid {
+            grid-template-columns: 1fr;
             max-width: 380px;
             margin: 0 auto;
           }

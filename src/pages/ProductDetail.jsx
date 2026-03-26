@@ -44,7 +44,7 @@ export default function ProductDetail() {
   return (
     <div style={{ paddingTop: 'var(--nav-h)' }}>
       {/* Breadcrumb */}
-      <div className="container" style={{ padding: '16px 48px' }}>
+      <div className="container" style={{ padding: '16px var(--px)' }}>
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           {[
             { label: 'Home', to: '/' },

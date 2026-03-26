@@ -228,7 +228,7 @@ export default function Hero() {
           right: 0,
           zIndex: 5,
           display: 'flex',
-          padding: '0 48px 36px',
+          padding: '0 var(--px) 36px',
           gap: '8px',
         }}
       >
@@ -289,13 +289,14 @@ export default function Hero() {
 
       {/* Slide counter */}
       <motion.div
+        className="hero-counter"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1, duration: 0.8 }}
         style={{
           position: 'absolute',
           bottom: '56px',
-          right: '48px',
+          right: 'var(--px)',
           zIndex: 5,
           display: 'flex',
           alignItems: 'center',
@@ -319,13 +320,14 @@ export default function Hero() {
 
       {/* Scroll hint */}
       <motion.div
+        className="hero-scroll"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 2, duration: 1 }}
         style={{
           position: 'absolute',
           bottom: '56px',
-          left: '48px',
+          left: 'var(--px)',
           zIndex: 5,
           display: 'flex',
           alignItems: 'center',
@@ -357,7 +359,7 @@ export default function Hero() {
 
       <style>{`
         @media (max-width: 768px) {
-          section > div:last-of-type { display: none; }
+          .hero-counter, .hero-scroll { display: none !important; }
         }
       `}</style>
     </section>

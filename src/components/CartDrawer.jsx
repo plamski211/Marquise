@@ -19,7 +19,7 @@ export default function CartDrawer() {
             transition={{ type: 'spring', damping: 32, stiffness: 300 }}
             style={{
               position: 'fixed', top: 0, right: 0, bottom: 0,
-              width: '100%', maxWidth: '420px', background: 'var(--bg)', zIndex: 2001,
+              width: '100%', maxWidth: 'min(420px, 100vw)', background: 'var(--bg)', zIndex: 2001,
               display: 'flex', flexDirection: 'column',
               boxShadow: '-8px 0 40px rgba(0,0,0,0.06)',
             }}
@@ -27,7 +27,7 @@ export default function CartDrawer() {
             {/* Header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '24px 28px', borderBottom: '1px solid var(--border)',
+              padding: '24px clamp(16px, 4vw, 28px)', borderBottom: '1px solid var(--border)',
             }}>
               <div>
                 <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1.4rem', fontWeight: 300 }}>Bag</h3>
@@ -44,7 +44,7 @@ export default function CartDrawer() {
             </div>
 
             {/* Items */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px' }}>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px clamp(16px, 4vw, 28px)' }}>
               {items.length === 0 ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                   <p style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', fontWeight: 300, color: 'var(--text-light)' }}>
@@ -106,7 +106,7 @@ export default function CartDrawer() {
 
             {/* Checkout */}
             {items.length > 0 && (
-              <div style={{ padding: '20px 28px', borderTop: '1px solid var(--border)' }}>
+              <div style={{ padding: '20px clamp(16px, 4vw, 28px)', borderTop: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <span className="label">Subtotal</span>
                   <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>${totalPrice.toFixed(2)}</span>

@@ -90,7 +90,7 @@ export default function Lookbook() {
             key={i}
             style={{
               background: look.gradient,
-              padding: '120px 0',
+              padding: 'clamp(60px, 10vh, 120px) 0',
               position: 'relative',
               overflow: 'hidden',
             }}
@@ -111,7 +111,7 @@ export default function Lookbook() {
             <div className="container" style={{ position: 'relative', zIndex: 1 }}>
               <ScrollReveal>
                 <div style={{
-                  textAlign: i % 2 === 0 ? 'left' : 'right',
+                  textAlign: 'left',
                   marginBottom: '64px',
                 }}>
                   <p style={{
@@ -146,11 +146,7 @@ export default function Lookbook() {
               </ScrollReveal>
 
               {/* Products row */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: `repeat(${Math.min(look.products.length, 3)}, 1fr)`,
-                gap: '24px',
-              }}>
+              <div className="lookbook-grid">
                 {look.products.map((product, j) => (
                   <ScrollReveal key={product.id} delay={j + 1}>
                     <Link to={`/product/${product.id}`} style={{ display: 'block' }}>
@@ -228,9 +224,14 @@ export default function Lookbook() {
       })}
 
       <style>{`
+        .lookbook-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
         @media (max-width: 768px) {
-          section .container div[style*="grid-template-columns: repeat(3"] {
-            grid-template-columns: 1fr !important;
+          .lookbook-grid {
+            grid-template-columns: 1fr;
             max-width: 400px;
             margin: 0 auto;
           }

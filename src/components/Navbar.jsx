@@ -48,10 +48,10 @@ export default function Navbar() {
           height: '100%',
           maxWidth: 'var(--max-w)',
           margin: '0 auto',
-          padding: '0 48px',
+          padding: '0 var(--px)',
         }}>
           {/* Left links */}
-          <div className="nav-desk" style={{ display: 'flex', gap: '32px', flex: 1 }}>
+          <div className="nav-desk" style={{ display: 'flex', gap: 'clamp(16px, 3vw, 32px)', flex: 1 }}>
             {links.map(l => (
               <Link key={l.path} to={l.path} style={{
                 fontFamily: 'var(--sans)',
@@ -71,12 +71,12 @@ export default function Navbar() {
           </div>
 
           {/* Logo */}
-          <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
             <img
               src="/marquise-logo-clean.png"
               alt="Marquise"
+              className="nav-logo"
               style={{
-                height: '64px',
                 width: 'auto',
                 objectFit: 'contain',
                 transition: 'filter 0.4s ease',
@@ -86,7 +86,7 @@ export default function Navbar() {
           </Link>
 
           {/* Right actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '28px', flex: 1, justifyContent: 'flex-end' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 3vw, 28px)', flex: 1, justifyContent: 'flex-end' }}>
             <Link to="/admin" className="nav-desk" style={{
               fontFamily: 'var(--sans)',
               fontSize: '0.6rem',
@@ -110,6 +110,7 @@ export default function Navbar() {
               gap: '6px',
               color: fg,
               transition: 'color 0.3s ease',
+              padding: '8px',
             }}
               onMouseEnter={e => e.currentTarget.style.color = fgHover}
               onMouseLeave={e => e.currentTarget.style.color = fg}
@@ -125,19 +126,18 @@ export default function Navbar() {
                   animate={{ scale: 1 }}
                   style={{
                     position: 'absolute',
-                    top: '-5px',
-                    right: '-8px',
+                    top: '0',
+                    right: '0',
                     width: '16px',
                     height: '16px',
                     borderRadius: '50%',
-                    background: 'var(--text)',
-                    color: 'var(--text-inv)',
+                    background: dark ? '#fff' : 'var(--text)',
+                    color: dark ? '#111' : 'var(--text-inv)',
                     fontSize: '0.5rem',
                     fontWeight: 600,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    ...(dark ? { background: '#fff', color: '#111' } : {}),
                   }}
                 >
                   {totalItems}
@@ -150,7 +150,11 @@ export default function Navbar() {
               display: 'none',
               flexDirection: 'column',
               gap: '5px',
-              padding: '4px',
+              padding: '10px 4px',
+              minWidth: '44px',
+              minHeight: '44px',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}>
               {[0,1,2].map(i => (
                 <span key={i} style={{
@@ -187,14 +191,14 @@ export default function Navbar() {
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '36px',
+              gap: 'clamp(28px, 6vh, 40px)',
             }}
           >
             {[...links, { label: 'Atelier', path: '/admin' }].map((l, i) => (
               <motion.div key={l.path} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                 <Link to={l.path} style={{
                   fontFamily: 'var(--serif)',
-                  fontSize: '1.8rem',
+                  fontSize: 'clamp(1.4rem, 5vw, 1.8rem)',
                   fontWeight: 300,
                   color: 'var(--text)',
                 }}>
@@ -207,9 +211,11 @@ export default function Navbar() {
       </AnimatePresence>
 
       <style>{`
+        .nav-logo { height: 80px; }
         .nav-desk { display: flex !important; }
         .nav-mob { display: none !important; }
         @media (max-width: 768px) {
+          .nav-logo { height: 56px; }
           .nav-desk { display: none !important; }
           .nav-mob { display: flex !important; }
         }

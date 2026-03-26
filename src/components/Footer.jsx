@@ -63,12 +63,8 @@ export default function Footer() {
       </div>
 
       {/* Links */}
-      <div className="container" style={{ padding: '56px 48px' }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1.5fr repeat(3, 1fr)',
-          gap: '40px',
-        }}>
+      <div className="container" style={{ padding: '56px var(--px)' }}>
+        <div className="footer-grid">
           <div>
             <img src="/marquise-logo-clean.png" alt="Marquise" style={{
               height: '80px', width: 'auto', marginBottom: '16px',
@@ -124,6 +120,25 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <style>{`
+        .footer-grid {
+          display: grid;
+          grid-template-columns: 1.5fr repeat(3, 1fr);
+          gap: 40px;
+        }
+        @media (max-width: 768px) {
+          .footer-grid {
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+          }
+        }
+        @media (max-width: 480px) {
+          .footer-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+          }
+        }
+      `}</style>
     </footer>
   );
 }
