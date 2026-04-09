@@ -1,8 +1,13 @@
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useLang } from '../context/LangContext';
+import { api } from '../lib/api';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, removeItem, updateQty, totalPrice } = useCart();
+  const { t } = useLang();
+  const [checkingOut, setCheckingOut] = useState(false);
 
   return (
     <AnimatePresence>
@@ -30,9 +35,9 @@ export default function CartDrawer() {
               padding: '24px clamp(16px, 4vw, 28px)', borderBottom: '1px solid var(--border)',
             }}>
               <div>
-                <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1.4rem', fontWeight: 300 }}>Bag</h3>
+                <h3 style={{ fontFamily: 'var(--serif)', fontSize: '1.4rem', fontWeight: 300 }}>{t('bag')}</h3>
                 <p style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--text-light)', marginTop: '2px' }}>
-                  {items.length} {items.length === 1 ? 'item' : 'items'}
+                  {items.length} {items.length === 1 ? t('item') : t('items')}
                 </p>
               </div>
               <button onClick={() => setIsOpen(false)} style={{ padding: '4px', transition: 'opacity 0.2s' }}
@@ -48,7 +53,7 @@ export default function CartDrawer() {
               {items.length === 0 ? (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
                   <p style={{ fontFamily: 'var(--serif)', fontSize: '1.1rem', fontWeight: 300, color: 'var(--text-light)' }}>
-                    Your bag is empty
+                    {t('bagEmpty')}
                   </p>
                 </div>
               ) : (
@@ -95,7 +100,7 @@ export default function CartDrawer() {
                             color: 'var(--text-light)', textDecoration: 'underline', textUnderlineOffset: '3px', transition: 'color 0.2s',
                           }}
                             onMouseEnter={e => e.target.style.color = 'var(--danger)'} onMouseLeave={e => e.target.style.color = 'var(--text-light)'}
-                          >Remove</button>
+                          >{t('remove')}</button>
                         </div>
                       </div>
                     </motion.div>
@@ -108,13 +113,23 @@ export default function CartDrawer() {
             {items.length > 0 && (
               <div style={{ padding: '20px clamp(16px, 4vw, 28px)', borderTop: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span className="label">Subtotal</span>
+                  <span className="label">{t('subtotal')}</span>
                   <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>${totalPrice.toFixed(2)}</span>
                 </div>
-                <p style={{ fontSize: '0.72rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '16px' }}>Shipping at checkout</p>
-                <button className="btn btn-filled" style={{ width: '100%', padding: '16px' }}
-                  onClick={() => alert('Checkout would connect to Stripe, etc.')}
-                >Checkout</button>
+                <p style={{ fontSize: '0.72rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '16px' }}>{t('shippingAtCheckout')}</p>
+                <button className="btn btn-filled" style={{ width: '100%', padding: '16px', opacity: checkingOut ? 0.6 : 1 }}
+                  disabled={checkingOut}
+                  onClick={async () => {
+                    setCheckingOut(true);
+                    try {
+                      const { url } = await api.post('/api/checkout');
+                      window.location.href = url;
+                    } catch (err) {
+                      alert(err.message || 'Checkout failed — please try again');
+                      setCheckingOut(false);
+                    }
+                  }}
+                >{checkingOut ? t('redirecting') : t('checkout')}</button>
               </div>
             )}
           </motion.div>

@@ -2,14 +2,18 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
-
-const links = [
-  { label: 'Shop', path: '/shop' },
-  { label: 'Lookbook', path: '/lookbook' },
-];
+import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 
 export default function Navbar() {
   const { totalItems, setIsOpen } = useCart();
+  const { user } = useAuth();
+  const { lang, toggle, t } = useLang();
+
+  const links = [
+    { label: t('shop'), path: '/shop' },
+    { label: t('lookbook'), path: '/lookbook' },
+  ];
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
@@ -87,21 +91,40 @@ export default function Navbar() {
 
           {/* Right actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 3vw, 28px)', flex: 1, justifyContent: 'flex-end' }}>
-            <Link to="/admin" className="nav-desk" style={{
+            {user?.role === 'admin' && (
+              <Link to="/admin" className="nav-desk" style={{
+                fontFamily: 'var(--sans)',
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                letterSpacing: '0.2em',
+                textTransform: 'uppercase',
+                color: fg,
+                transition: 'color 0.3s ease',
+                display: 'inline',
+              }}
+                onMouseEnter={e => e.target.style.color = fgHover}
+                onMouseLeave={e => e.target.style.color = fg}
+              >
+                {t('atelier')}
+              </Link>
+            )}
+
+            <button onClick={toggle} style={{
               fontFamily: 'var(--sans)',
-              fontSize: '0.6rem',
-              fontWeight: 500,
-              letterSpacing: '0.2em',
+              fontSize: '0.55rem',
+              fontWeight: 600,
+              letterSpacing: '0.1em',
               textTransform: 'uppercase',
               color: fg,
               transition: 'color 0.3s ease',
-              display: 'inline',
+              padding: '6px 8px',
+              border: `1px solid ${dark ? 'rgba(255,255,255,0.2)' : 'var(--border)'}`,
             }}
-              onMouseEnter={e => e.target.style.color = fgHover}
-              onMouseLeave={e => e.target.style.color = fg}
+              onMouseEnter={e => e.currentTarget.style.color = fgHover}
+              onMouseLeave={e => e.currentTarget.style.color = fg}
             >
-              Atelier
-            </Link>
+              {lang === 'en' ? 'BG' : 'EN'}
+            </button>
 
             <button onClick={() => setIsOpen(true)} style={{
               position: 'relative',
@@ -194,7 +217,7 @@ export default function Navbar() {
               gap: 'clamp(28px, 6vh, 40px)',
             }}
           >
-            {[...links, { label: 'Atelier', path: '/admin' }].map((l, i) => (
+            {[...links, ...(user?.role === 'admin' ? [{ label: t('atelier'), path: '/admin' }] : [])].map((l, i) => (
               <motion.div key={l.path} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
                 <Link to={l.path} style={{
                   fontFamily: 'var(--serif)',

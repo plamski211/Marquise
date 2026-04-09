@@ -2,29 +2,31 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import { useProducts } from '../context/ProductContext';
+import { useLang } from '../context/LangContext';
 
 export default function Lookbook() {
+  const { t } = useLang();
   const { products } = useProducts();
 
   const looks = [
     {
-      title: 'Evening Noir',
-      subtitle: 'The art of after-dark dressing',
+      titleKey: 'lookTitle1',
+      subtitleKey: 'lookDesc1',
       products: products.filter(p => ['p1', 'p6', 'p7'].includes(p.id)),
       gradient: 'linear-gradient(145deg, #1A1614 0%, #2A2420 50%, #1A1614 100%)',
       accent: 'rgba(184, 149, 106, 0.15)',
     },
     {
-      title: 'Quiet Luxury',
-      subtitle: 'Understated elegance, extraordinary quality',
+      titleKey: 'lookTitle2',
+      subtitleKey: 'lookDesc2',
       products: products.filter(p => ['p2', 'p4', 'p5'].includes(p.id)),
       gradient: 'linear-gradient(145deg, #F5F0EB 0%, #E8DFD4 50%, #DDD3C5 100%)',
       accent: 'rgba(26, 22, 20, 0.06)',
       dark: false,
     },
     {
-      title: 'Power Silhouettes',
-      subtitle: 'Command every room you enter',
+      titleKey: 'lookTitle3',
+      subtitleKey: 'lookDesc3',
       products: products.filter(p => ['p3', 'p10', 'p9'].includes(p.id)),
       gradient: 'linear-gradient(145deg, #1B2838 0%, #243447 50%, #1B2838 100%)',
       accent: 'rgba(184, 149, 106, 0.1)',
@@ -53,7 +55,7 @@ export default function Lookbook() {
               marginBottom: '16px',
             }}
           >
-            Spring / Summer 2026
+            {t('lookbookSeason')}
           </motion.p>
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -67,7 +69,7 @@ export default function Lookbook() {
               marginBottom: '16px',
             }}
           >
-            Lookbook
+            {t('lookbook')}
           </motion.h1>
           <motion.div
             initial={{ width: 0 }}
@@ -123,7 +125,7 @@ export default function Lookbook() {
                     color: 'var(--accent)',
                     marginBottom: '16px',
                   }}>
-                    Look {String(i + 1).padStart(2, '0')}
+                    {t('look')} {String(i + 1).padStart(2, '0')}
                   </p>
                   <h2 style={{
                     fontFamily: 'var(--serif)',
@@ -133,14 +135,14 @@ export default function Lookbook() {
                     color: isDark ? 'var(--text-inv)' : 'var(--text)',
                     marginBottom: '12px',
                   }}>
-                    {look.title}
+                    {t(look.titleKey)}
                   </h2>
                   <p style={{
                     fontSize: '0.9rem',
                     fontWeight: 300,
                     color: isDark ? 'rgba(250, 248, 245, 0.4)' : 'var(--text-mid)',
                   }}>
-                    {look.subtitle}
+                    {t(look.subtitleKey)}
                   </p>
                 </div>
               </ScrollReveal>

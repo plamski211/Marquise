@@ -1,24 +1,12 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../context/ProductContext';
-import { categories as categoryList } from '../data/defaultProducts';
+import { useAuth } from '../context/AuthContext';
+import { api } from '../lib/api';
 
-const CATEGORIES = categoryList.filter(c => c !== 'All');
+const FALLBACK_GRADIENT = 'linear-gradient(145deg, #E8E2DA 0%, #D4CCC0 100%)';
 
-const emptyProduct = {
-  name: '',
-  price: '',
-  category: CATEGORIES[0],
-  description: '',
-  sizes: [],
-  colors: [],
-  featured: false,
-  isNew: false,
-  gradient: 'linear-gradient(145deg, #E8E2DA 0%, #D4CCC0 100%)',
-  images: [],
-};
-
-const SIZE_OPTIONS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
+const SIZE_OPTIONS_FALLBACK = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
 const GRADIENT_PRESETS = [
   { label: 'Noir', value: 'linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 40%, #1a1a1a 100%)' },
   { label: 'Ivory', value: 'linear-gradient(145deg, #F5F0EB 0%, #E8DFD4 40%, #DDD3C5 100%)' },
@@ -31,14 +19,71 @@ const GRADIENT_PRESETS = [
 ];
 
 export default function Admin() {
-  const { products, addProduct, updateProduct, deleteProduct, resetToDefaults } = useProducts();
-  const [form, setForm] = useState({ ...emptyProduct });
+  const { products, addProduct, updateProduct, deleteProduct, refreshProducts } = useProducts();
+  const { logout } = useAuth();
+
+  // Lookup data from API
+  const [dbCategories, setDbCategories] = useState([]);
+  const [dbSizes, setDbSizes] = useState([]);
+  const [dbColors, setDbColors] = useState([]);
+
+  useEffect(() => {
+    api.get('/api/categories').then(setDbCategories).catch(() => {});
+    api.get('/api/categories/sizes').then(setDbSizes).catch(() => {});
+    api.get('/api/categories/colors').then(setDbColors).catch(() => {});
+  }, []);
+
+  const CATEGORIES = dbCategories.map(c => c.name);
+
+  const makeEmptyProduct = () => ({
+    name: '',
+    price: '',
+    category: CATEGORIES[0] || 'Dresses',
+    description: '',
+    sizes: [],
+    colors: [],
+    featured: false,
+    isNew: false,
+    gradient: FALLBACK_GRADIENT,
+    images: [],   // unified: [{ type:'existing', src:'/uploads/...' }, { type:'new', file:File }]
+    pieces: [],   // [{ name:'', price:'' }]
+  });
+
+  const [activeTab, setActiveTab] = useState('products');
+  const [form, setForm] = useState(makeEmptyProduct);
   const [editingId, setEditingId] = useState(null);
   const [colorInput, setColorInput] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [toast, setToast] = useState('');
+  const [saving, setSaving] = useState(false);
   const fileRef = useRef(null);
+
+  // Orders state
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+
+  const loadOrders = useCallback(() => {
+    setOrdersLoading(true);
+    api.get('/api/orders/admin')
+      .then(setOrders)
+      .catch(() => showToast('Failed to load orders'))
+      .finally(() => setOrdersLoading(false));
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'orders') loadOrders();
+  }, [activeTab, loadOrders]);
+
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await api.put(`/api/orders/${orderId}/status`, { status });
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
+      showToast('Status updated');
+    } catch (err) {
+      showToast(err.message || 'Failed to update status');
+    }
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -47,17 +92,12 @@ export default function Admin() {
 
   /* ── Image handling ── */
   const handleImageUpload = useCallback((files) => {
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setForm(prev => ({
-          ...prev,
-          images: [...prev.images, e.target.result],
-        }));
-      };
-      reader.readAsDataURL(file);
-    });
+    const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+    if (validFiles.length === 0) return;
+    setForm(prev => ({
+      ...prev,
+      images: [...prev.images, ...validFiles.map(file => ({ type: 'new', file }))],
+    }));
   }, []);
 
   const handleDrag = (e) => {
@@ -130,29 +170,85 @@ export default function Admin() {
   };
 
   /* ── Form submit ── */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.price) {
       showToast('Please fill in name and price');
       return;
     }
 
-    const productData = {
-      ...form,
-      price: parseFloat(form.price),
-    };
+    setSaving(true);
+    try {
+      // Map names to IDs
+      const categoryObj = dbCategories.find(c => c.name === form.category);
+      if (!categoryObj) {
+        showToast('Invalid category');
+        setSaving(false);
+        return;
+      }
 
-    if (editingId) {
-      updateProduct(editingId, productData);
-      showToast('Product updated');
-    } else {
-      addProduct(productData);
-      showToast('Product added');
+      const sizeIds = form.sizes
+        .map(name => dbSizes.find(s => s.name === name)?.id)
+        .filter(Boolean);
+      const colorIds = form.colors
+        .map(name => dbColors.find(c => c.name === name)?.id)
+        .filter(Boolean);
+
+      // Create any new colors that don't exist yet
+      for (const colorName of form.colors) {
+        if (!dbColors.find(c => c.name === colorName)) {
+          try {
+            const newColor = await api.post('/api/categories/colors', { name: colorName });
+            setDbColors(prev => [...prev, newColor]);
+            colorIds.push(newColor.id);
+          } catch {}
+        }
+      }
+
+      // Build pieces data
+      const piecesData = form.pieces
+        .filter(p => p.name.trim() && p.price)
+        .map(p => ({ name: p.name.trim(), price: parseFloat(p.price) }));
+
+      const productData = {
+        name: form.name,
+        price: parseFloat(form.price),
+        category_id: categoryObj.id,
+        description: form.description,
+        featured: form.featured,
+        is_new: form.isNew,
+        gradient: form.gradient,
+        sizes: sizeIds,
+        colors: colorIds,
+        pieces: piecesData,
+      };
+
+      let product;
+      if (editingId) {
+        product = await updateProduct(editingId, productData);
+        showToast('Product updated');
+      } else {
+        product = await addProduct(productData);
+        showToast('Product added');
+      }
+
+      // Upload new image files if any
+      const newFiles = form.images.filter(img => img.type === 'new');
+      if (newFiles.length > 0 && product?.id) {
+        const formData = new FormData();
+        newFiles.forEach(img => formData.append('images', img.file));
+        await api.upload(`/api/products/${product.id}/images`, formData);
+        await refreshProducts();
+      }
+
+      setForm(makeEmptyProduct());
+      setEditingId(null);
+      setShowForm(false);
+    } catch (err) {
+      showToast(err.message || 'Failed to save');
+    } finally {
+      setSaving(false);
     }
-
-    setForm({ ...emptyProduct });
-    setEditingId(null);
-    setShowForm(false);
   };
 
   const handleEdit = (product) => {
@@ -165,23 +261,28 @@ export default function Admin() {
       colors: [...(product.colors || [])],
       featured: product.featured || false,
       isNew: product.isNew || false,
-      gradient: product.gradient || emptyProduct.gradient,
-      images: [...(product.images || [])],
+      gradient: product.gradient || FALLBACK_GRADIENT,
+      images: (product.images || []).map(src => ({ type: 'existing', src })),
+      pieces: (product.pieces || []).map(p => ({ name: p.name, price: p.price.toString() })),
     });
     setEditingId(product.id);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Remove this piece from the collection?')) {
-      deleteProduct(id);
-      showToast('Product removed');
+      try {
+        await deleteProduct(id);
+        showToast('Product removed');
+      } catch (err) {
+        showToast(err.message || 'Failed to remove');
+      }
     }
   };
 
   const cancelEdit = () => {
-    setForm({ ...emptyProduct });
+    setForm(makeEmptyProduct());
     setEditingId(null);
     setShowForm(false);
   };
@@ -232,12 +333,7 @@ export default function Admin() {
             </div>
             <div style={{ display: 'flex', gap: '12px' }}>
               <button
-                onClick={() => {
-                  if (window.confirm('Reset to default collection? This removes all custom products.')) {
-                    resetToDefaults();
-                    showToast('Collection reset');
-                  }
-                }}
+                onClick={async () => { await logout(); }}
                 className="btn btn-sm"
                 style={{
                   border: '1px solid var(--border)',
@@ -247,19 +343,34 @@ export default function Admin() {
                   textTransform: 'uppercase',
                 }}
               >
-                Reset
+                Sign Out
               </button>
-              <button
-                onClick={() => { setShowForm(true); setEditingId(null); setForm({ ...emptyProduct }); }}
-                className="btn btn-gold btn-sm"
-              >
-                + Add Piece
-              </button>
+              {activeTab === 'products' && (
+                <button
+                  onClick={() => { setShowForm(true); setEditingId(null); setForm(makeEmptyProduct()); }}
+                  className="btn btn-gold btn-sm"
+                >
+                  + Add Piece
+                </button>
+              )}
             </div>
+          </div>
+
+          {/* Tabs */}
+          <div style={{ display: 'flex', gap: '32px', marginTop: '28px' }}>
+            {['products', 'orders'].map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)} style={{
+                fontSize: '0.7rem', fontWeight: 400, letterSpacing: '0.15em', textTransform: 'uppercase',
+                color: activeTab === tab ? 'var(--text)' : 'var(--text-light)',
+                borderBottom: activeTab === tab ? '1.5px solid var(--text)' : '1.5px solid transparent',
+                paddingBottom: '8px', transition: 'all 0.25s',
+              }}>{tab}</button>
+            ))}
           </div>
         </div>
       </section>
 
+      {activeTab === 'products' && (
       <div className="container" style={{ padding: '40px var(--px) 120px' }}>
         {/* Product Form */}
         <AnimatePresence>
@@ -384,7 +495,7 @@ export default function Admin() {
                             border: i === 0 ? '2px solid var(--accent)' : '1px solid var(--border)',
                             flexShrink: 0,
                           }}>
-                            <img src={img} alt="" style={{
+                            <img src={img.type === 'new' ? URL.createObjectURL(img.file) : img.src} alt="" style={{
                               width: '100%',
                               height: '100%',
                               objectFit: 'cover',
@@ -635,7 +746,7 @@ export default function Admin() {
                 <div style={{ marginBottom: '24px' }}>
                   <label className="input-label">Sizes</label>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                    {SIZE_OPTIONS.map(size => (
+                    {(dbSizes.length > 0 ? dbSizes.map(s => s.name) : SIZE_OPTIONS_FALLBACK).map(size => (
                       <button
                         key={size}
                         type="button"
@@ -703,6 +814,104 @@ export default function Admin() {
                       ))}
                     </div>
                   )}
+                </div>
+
+                {/* Pieces (bundle items) */}
+                <div style={{ marginBottom: '36px' }}>
+                  <label className="input-label">Pieces in this Look</label>
+                  <p style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 300,
+                    color: 'var(--text-light)',
+                    marginBottom: '12px',
+                  }}>
+                    If this is an outfit or set, add each individual piece with its own name and price.
+                  </p>
+
+                  {form.pieces.map((piece, i) => (
+                    <div key={i} style={{
+                      display: 'flex',
+                      gap: '10px',
+                      alignItems: 'center',
+                      marginBottom: '10px',
+                    }}>
+                      <input
+                        type="text"
+                        placeholder="e.g. Silk Top"
+                        value={piece.name}
+                        onChange={(e) => setForm(prev => ({
+                          ...prev,
+                          pieces: prev.pieces.map((p, j) => j === i ? { ...p, name: e.target.value } : p),
+                        }))}
+                        style={{
+                          flex: 2,
+                          padding: '10px 14px',
+                          border: '1px solid var(--border)',
+                          background: 'transparent',
+                          fontFamily: 'var(--sans)',
+                          fontSize: '0.85rem',
+                        }}
+                      />
+                      <input
+                        type="number"
+                        placeholder="Price"
+                        value={piece.price}
+                        onChange={(e) => setForm(prev => ({
+                          ...prev,
+                          pieces: prev.pieces.map((p, j) => j === i ? { ...p, price: e.target.value } : p),
+                        }))}
+                        style={{
+                          flex: 1,
+                          padding: '10px 14px',
+                          border: '1px solid var(--border)',
+                          background: 'transparent',
+                          fontFamily: 'var(--sans)',
+                          fontSize: '0.85rem',
+                        }}
+                        min="0"
+                        step="0.01"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setForm(prev => ({
+                          ...prev,
+                          pieces: prev.pieces.filter((_, j) => j !== i),
+                        }))}
+                        style={{
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid var(--border)',
+                          color: 'var(--text-light)',
+                          fontSize: '1rem',
+                          cursor: 'pointer',
+                          flexShrink: 0,
+                        }}
+                      >
+                        &times;
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={() => setForm(prev => ({
+                      ...prev,
+                      pieces: [...prev.pieces, { name: '', price: '' }],
+                    }))}
+                    className="btn btn-sm"
+                    style={{
+                      border: '1px solid var(--border)',
+                      color: 'var(--text-mid)',
+                      fontSize: '0.65rem',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    + Add Piece
+                  </button>
                 </div>
 
                 {/* Gradient (placeholder background) */}
@@ -820,6 +1029,7 @@ export default function Admin() {
                     {product.isNew && ' · New'}
                     {product.featured && ' · Featured'}
                     {product.images?.length > 0 && ` · ${product.images.length} image${product.images.length > 1 ? 's' : ''}`}
+                    {product.pieces?.length > 0 && ` · ${product.pieces.length} piece${product.pieces.length > 1 ? 's' : ''}`}
                   </p>
                 </div>
 
@@ -884,6 +1094,78 @@ export default function Admin() {
           </div>
         </div>
       </div>
+      )}
+
+      {/* Orders Panel */}
+      {activeTab === 'orders' && (
+      <div className="container" style={{ padding: '40px var(--px) 120px' }}>
+        {ordersLoading ? (
+          <p style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--text-light)', textAlign: 'center', padding: '60px 0' }}>
+            Loading orders…
+          </p>
+        ) : orders.length === 0 ? (
+          <p style={{ fontFamily: 'var(--serif)', fontSize: '1rem', color: 'var(--text-light)', textAlign: 'center', padding: '60px 0' }}>
+            No orders yet
+          </p>
+        ) : (
+          <>
+            <div style={{ marginBottom: '24px' }}>
+              <span className="label">{orders.length} {orders.length === 1 ? 'order' : 'orders'}</span>
+            </div>
+            {orders.map((order, i) => (
+              <motion.div key={order.id}
+                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.03 }}
+                className="admin-row"
+                style={{ flexWrap: 'wrap' }}
+              >
+                <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                  <p style={{ fontFamily: 'monospace', fontSize: '0.78rem', marginBottom: '4px' }}>
+                    {order.id.slice(0, 8).toUpperCase()}
+                  </p>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                    {order.customer_email || 'Guest'}
+                    {order.first_name && ` — ${order.first_name} ${order.last_name || ''}`}
+                  </p>
+                </div>
+
+                <div className="admin-col-hide" style={{ flex: '0 0 auto' }}>
+                  <p style={{ fontSize: '0.78rem' }}>
+                    ${parseFloat(order.total).toFixed(2)}
+                  </p>
+                </div>
+
+                <div className="admin-col-hide-sm" style={{ flex: '0 0 auto' }}>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-light)' }}>
+                    {new Date(order.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </p>
+                </div>
+
+                <div style={{ flex: '0 0 auto' }}>
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                    style={{
+                      fontSize: '0.7rem', fontWeight: 400, letterSpacing: '0.08em', textTransform: 'uppercase',
+                      padding: '6px 10px', border: '1px solid var(--border)', background: 'transparent',
+                      color: order.status === 'confirmed' ? 'var(--accent)' :
+                             order.status === 'shipped' ? '#2D7D6F' :
+                             order.status === 'delivered' ? '#3A7D44' :
+                             order.status === 'cancelled' ? 'var(--danger)' : 'var(--text-light)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'].map(s => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </motion.div>
+            ))}
+          </>
+        )}
+      </div>
+      )}
 
       {/* Toast */}
       <div className={`toast ${toast ? 'show' : ''}`}>

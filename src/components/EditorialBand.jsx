@@ -2,8 +2,10 @@ import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
+import { useLang } from '../context/LangContext';
 
 export default function EditorialBand() {
+  const { t } = useLang();
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
@@ -71,7 +73,7 @@ export default function EditorialBand() {
                   marginBottom: '28px',
                 }}
               >
-                Marquise Atelier
+                {t('editorialTitle')}
               </p>
 
               <h2
@@ -85,9 +87,9 @@ export default function EditorialBand() {
                   marginBottom: '20px',
                 }}
               >
-                Where tradition
+                {t('editorialLine1')}
                 <br />
-                meets the contemporary
+                {t('editorialLine2')}
               </h2>
 
               {/* Animated gold line */}
@@ -112,9 +114,7 @@ export default function EditorialBand() {
                   marginBottom: '48px',
                 }}
               >
-                Each piece is conceived with an unwavering commitment to craft. From
-                the selection of the finest fabrics to the precision of every stitch,
-                Marquise embodies the art of dressing well.
+                {t('editorialBody')}
               </p>
 
               <Link
@@ -135,7 +135,7 @@ export default function EditorialBand() {
                   e.target.style.color = 'rgba(255,255,255,0.5)';
                 }}
               >
-                View Lookbook
+                {t('viewLookbook')}
               </Link>
             </motion.div>
           </ScrollReveal>
@@ -195,7 +195,7 @@ export default function EditorialBand() {
                       letterSpacing: '0.05em',
                     }}
                   >
-                    Lookbook
+                    {t('lookbook')}
                   </p>
                 </div>
               </motion.div>

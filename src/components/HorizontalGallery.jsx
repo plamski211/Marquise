@@ -2,8 +2,10 @@ import { useRef, useState, useEffect } from 'react';
 import { motion, useMotionValue, useAnimation } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
+import { useLang } from '../context/LangContext';
 
 export default function HorizontalGallery({ products }) {
+  const { t } = useLang();
   const trackRef = useRef(null);
   const [constraint, setConstraint] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -44,9 +46,9 @@ export default function HorizontalGallery({ products }) {
                 className="label"
                 style={{ marginBottom: '12px', color: 'var(--accent)' }}
               >
-                The Collection
+                {t('theCollection')}
               </p>
-              <h2 style={{ lineHeight: 1.05 }}>Explore</h2>
+              <h2 style={{ lineHeight: 1.05 }}>{t('explore')}</h2>
             </div>
             <p
               style={{
@@ -58,7 +60,7 @@ export default function HorizontalGallery({ products }) {
                 color: 'var(--text-light)',
               }}
             >
-              Drag to explore&ensp;&rarr;
+              {t('dragToExplore')}
             </p>
           </div>
         </ScrollReveal>
@@ -193,7 +195,7 @@ export default function HorizontalGallery({ products }) {
                       padding: '8px 16px',
                     }}
                   >
-                    View
+                    {t('view')}
                   </motion.div>
                 </div>
 

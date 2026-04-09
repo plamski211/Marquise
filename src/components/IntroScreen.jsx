@@ -18,7 +18,9 @@ export default function IntroScreen({ onComplete }) {
   }, [onComplete]);
 
   useEffect(() => {
-    const timer = setTimeout(finish, 3600);
+    const seen = sessionStorage.getItem('intro_seen');
+    const timer = setTimeout(finish, seen ? 1200 : 3600);
+    sessionStorage.setItem('intro_seen', '1');
     return () => clearTimeout(timer);
   }, [finish]);
 

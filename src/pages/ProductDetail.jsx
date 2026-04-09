@@ -3,9 +3,11 @@ import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
+import { useLang } from '../context/LangContext';
 import ProductCard from '../components/ProductCard';
 
 export default function ProductDetail() {
+  const { t } = useLang();
   const { id } = useParams();
   const { getProduct, products } = useProducts();
   const { addItem } = useCart();
@@ -29,8 +31,8 @@ export default function ProductDetail() {
     return (
       <div style={{ paddingTop: 'var(--nav-h)', minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--serif)', fontSize: '1.3rem', color: 'var(--text-mid)', marginBottom: '16px' }}>Piece not found</p>
-          <Link to="/shop" className="btn btn-sm">Back to Collection</Link>
+          <p style={{ fontFamily: 'var(--serif)', fontSize: '1.3rem', color: 'var(--text-mid)', marginBottom: '16px' }}>{t('pieceNotFound')}</p>
+          <Link to="/shop" className="btn btn-sm">{t('backToCollection')}</Link>
         </div>
       </div>
     );
@@ -47,8 +49,8 @@ export default function ProductDetail() {
       <div className="container" style={{ padding: '16px var(--px)' }}>
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           {[
-            { label: 'Home', to: '/' },
-            { label: 'Collection', to: '/shop' },
+            { label: t('home'), to: '/' },
+            { label: t('collection'), to: '/shop' },
           ].map((b, i) => (
             <span key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Link to={b.to} style={{ fontSize: '0.68rem', color: 'var(--text-light)', transition: 'color 0.2s' }}
@@ -129,11 +131,78 @@ export default function ProductDetail() {
             </p>
           )}
 
+          {/* Pieces (bundle items) */}
+          {product.pieces?.length > 0 && (
+            <div style={{ marginBottom: '36px' }}>
+              <p className="label" style={{ marginBottom: '14px' }}>
+                {t('piecesInLook')}
+              </p>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0',
+                border: '1px solid var(--border)',
+              }}>
+                {product.pieces.map((piece, i) => (
+                  <div key={piece.id || i} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '12px 16px',
+                    borderTop: i > 0 ? '1px solid var(--border)' : 'none',
+                  }}>
+                    <span style={{
+                      fontSize: '0.85rem',
+                      fontWeight: 300,
+                      color: 'var(--text)',
+                    }}>
+                      {piece.name}
+                    </span>
+                    <span style={{
+                      fontFamily: 'var(--serif)',
+                      fontSize: '0.9rem',
+                      fontWeight: 300,
+                      color: 'var(--text-mid)',
+                    }}>
+                      ${piece.price}
+                    </span>
+                  </div>
+                ))}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 16px',
+                  borderTop: '1px solid var(--text)',
+                  background: 'var(--bg-alt)',
+                }}>
+                  <span style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 500,
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    color: 'var(--text-mid)',
+                  }}>
+                    {t('completeLook')}
+                  </span>
+                  <span style={{
+                    fontFamily: 'var(--serif)',
+                    fontSize: '1rem',
+                    fontWeight: 400,
+                    color: 'var(--text)',
+                  }}>
+                    ${product.price}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Color */}
           {showColors && (
             <div style={{ marginBottom: '28px' }}>
               <p className="label" style={{ marginBottom: '12px' }}>
-                Color — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedColor}</span>
+                {t('color')} — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedColor}</span>
               </p>
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                 {product.colors.map(c => (
@@ -154,7 +223,7 @@ export default function ProductDetail() {
           {showSizes && (
             <div style={{ marginBottom: '36px' }}>
               <p className="label" style={{ marginBottom: '12px' }}>
-                Size — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedSize}</span>
+                {t('size')} — <span style={{ fontWeight: 400, color: 'var(--text)', letterSpacing: '0.02em', textTransform: 'none' }}>{selectedSize}</span>
               </p>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {product.sizes.map(s => (
@@ -179,12 +248,12 @@ export default function ProductDetail() {
             className="btn btn-filled btn-lg"
             style={{ width: '100%', marginBottom: '16px' }}
           >
-            Add to Bag
+            {t('addToBag')}
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '28px', paddingTop: '28px', borderTop: '1px solid var(--border)' }}>
-            {['Complimentary shipping', 'Free returns within 30 days', 'Gift wrapping available'].map(t => (
-              <p key={t} style={{ fontSize: '0.76rem', fontWeight: 300, color: 'var(--text-light)' }}>{t}</p>
+            {[t('freeShipping'), t('freeReturns'), t('giftWrapping')].map(perk => (
+              <p key={perk} style={{ fontSize: '0.76rem', fontWeight: 300, color: 'var(--text-light)' }}>{perk}</p>
             ))}
           </div>
         </motion.div>
@@ -194,7 +263,7 @@ export default function ProductDetail() {
       {related.length > 0 && (
         <section style={{ padding: '80px 0 120px', background: 'var(--bg-alt)' }}>
           <div className="container">
-            <h2 style={{ marginBottom: '48px' }}>You May Also Like</h2>
+            <h2 style={{ marginBottom: '48px' }}>{t('youMayAlsoLike')}</h2>
             <div className="related-grid">
               {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>

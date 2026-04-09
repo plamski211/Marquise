@@ -1,51 +1,49 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import defaultProducts from '../data/defaultProducts';
+import { api } from '../lib/api';
 
-const STORAGE_KEY = 'marquise_products';
 const ProductContext = createContext();
 
-function loadProducts() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {}
-  return defaultProducts;
-}
-
 export function ProductProvider({ children }) {
-  const [products, setProducts] = useState(loadProducts);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchProducts = useCallback(async () => {
+    try {
+      setError(null);
+      const data = await api.get('/api/products');
+      setProducts(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Failed to load products:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-    } catch {
-      // localStorage quota exceeded (e.g. too many base64 images)
-    }
-  }, [products]);
+    fetchProducts();
+  }, [fetchProducts]);
 
-  const addProduct = useCallback((product) => {
-    const newProduct = {
-      ...product,
-      id: 'p' + Date.now(),
-      isNew: product.isNew !== undefined ? product.isNew : true,
-    };
-    setProducts(prev => [newProduct, ...prev]);
-    return newProduct;
+  const addProduct = useCallback(async (productData) => {
+    const product = await api.post('/api/products', productData);
+    setProducts(prev => [product, ...prev]);
+    return product;
   }, []);
 
-  const updateProduct = useCallback((id, updates) => {
-    setProducts(prev => prev.map(p => p.id === id ? { ...p, ...updates } : p));
+  const updateProduct = useCallback(async (id, updates) => {
+    const product = await api.put(`/api/products/${id}`, updates);
+    setProducts(prev => prev.map(p => p.id === id ? product : p));
+    return product;
   }, []);
 
-  const deleteProduct = useCallback((id) => {
+  const deleteProduct = useCallback(async (id) => {
+    await api.delete(`/api/products/${id}`);
     setProducts(prev => prev.filter(p => p.id !== id));
   }, []);
 
   const getProduct = useCallback((id) => {
-    return products.find(p => p.id === id) || null;
+    return products.find(p => p.id === id || p.slug === id) || null;
   }, [products]);
 
   const getByCategory = useCallback((category) => {
@@ -61,16 +59,12 @@ export function ProductProvider({ children }) {
     return products.filter(p => p.isNew);
   }, [products]);
 
-  const resetToDefaults = useCallback(() => {
-    setProducts(defaultProducts);
-    localStorage.removeItem(STORAGE_KEY);
-  }, []);
-
   return (
     <ProductContext.Provider value={{
-      products, addProduct, updateProduct, deleteProduct,
+      products, loading, error,
+      addProduct, updateProduct, deleteProduct,
       getProduct, getByCategory, getFeatured, getNew,
-      resetToDefaults,
+      refreshProducts: fetchProducts,
     }}>
       {children}
     </ProductContext.Provider>

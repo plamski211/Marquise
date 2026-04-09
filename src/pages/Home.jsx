@@ -5,8 +5,10 @@ import EditorialBand from '../components/EditorialBand';
 import ProductCard from '../components/ProductCard';
 import ScrollReveal from '../components/ScrollReveal';
 import { useProducts } from '../context/ProductContext';
+import { useLang } from '../context/LangContext';
 
 export default function Home() {
+  const { t } = useLang();
   const { getFeatured, getNew } = useProducts();
   const featured = getFeatured().slice(0, 10);
   const newArrivals = getNew().slice(0, 4);
@@ -44,9 +46,9 @@ export default function Home() {
                     className="label"
                     style={{ marginBottom: '12px', color: 'var(--accent)' }}
                   >
-                    Just Arrived
+                    {t('justArrived')}
                   </p>
-                  <h2>New In</h2>
+                  <h2>{t('newIn')}</h2>
                 </div>
                 <Link
                   to="/shop?filter=new"
@@ -70,7 +72,7 @@ export default function Home() {
                     e.target.style.borderColor = 'var(--border)';
                   }}
                 >
-                  View All
+                  {t('viewAll')}
                 </Link>
               </div>
             </ScrollReveal>

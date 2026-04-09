@@ -1,26 +1,34 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useLang } from '../context/LangContext';
+import Bag1 from '../Images/Bag1.webp';
+import Bag2 from '../Images/Bag2.webp';
+import Grey1 from '../Images/Grey1.webp';
+import Grey2 from '../Images/Grey2.webp';
+import Grey3 from '../Images/Grey3.webp';
+import Grey4 from '../Images/Grey4.webp';
+import Grey5 from '../Images/Grey5.webp';
 
 const slides = [
   {
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1920&q=85',
+    image: Bag1,
     imageFocus: '50% 20%',
     fallbackBg: 'linear-gradient(160deg, #0C0B0A 0%, #1E1C1A 40%, #0C0B0A 100%)',
     overlay: 'linear-gradient(105deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 50%, rgba(0,0,0,0.18) 100%)',
     label: '01',
-    title: ['Spring', 'Summer'],
-    subtitle: '2026 Collection',
+    titleKeys: ['heroLabel1', 'heroLabel2'],
+    subtitleKey: 'heroLabel3',
     align: 'left',
   },
   {
-    image: 'https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1920&q=85',
+    image: Grey1,
     imageFocus: '50% 25%',
     fallbackBg: 'linear-gradient(160deg, #1B2838 0%, #263A50 40%, #1B2838 100%)',
     overlay: 'linear-gradient(180deg, rgba(0,0,0,0.22) 0%, rgba(0,0,0,0.52) 55%, rgba(0,0,0,0.72) 100%)',
     label: '02',
-    title: ['The Art of', 'Dressing'],
-    subtitle: 'Curated Elegance',
+    titleKeys: ['heroTitle1a', 'heroTitle1b'],
+    subtitleKey: 'heroSub1',
     align: 'center',
   },
   {
@@ -29,8 +37,8 @@ const slides = [
     fallbackBg: 'linear-gradient(160deg, #2A2420 0%, #3A3430 40%, #1A1614 100%)',
     overlay: 'linear-gradient(255deg, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.42) 50%, rgba(0,0,0,0.18) 100%)',
     label: '03',
-    title: ['Crafted', 'By Hand'],
-    subtitle: 'Artisan Excellence',
+    titleKeys: ['heroTitle2a', 'heroTitle2b'],
+    subtitleKey: 'heroSub2',
     align: 'right',
   },
 ];
@@ -44,6 +52,7 @@ const textV = {
 };
 
 export default function Hero() {
+  const { t } = useLang();
   const [current, setCurrent] = useState(0);
   const timerRef = useRef(null);
   const sectionRef = useRef(null);
@@ -161,7 +170,7 @@ export default function Hero() {
 
             {/* Title — each line staggers */}
             <div style={{ marginBottom: '28px' }}>
-              {slide.title.map((line, i) => (
+              {slide.titleKeys.map((key, i) => (
                 <div key={i} style={{ overflow: 'hidden' }}>
                   <motion.span
                     variants={textV}
@@ -180,7 +189,7 @@ export default function Hero() {
                       letterSpacing: '-0.03em',
                     }}
                   >
-                    {line}
+                    {t(key)}
                   </motion.span>
                 </div>
               ))}
@@ -200,7 +209,7 @@ export default function Hero() {
                 marginBottom: '44px',
               }}
             >
-              {slide.subtitle}
+              {t(slide.subtitleKey)}
             </motion.p>
 
             {/* CTA */}
@@ -223,7 +232,7 @@ export default function Hero() {
                   e.target.style.color = 'rgba(255,255,255,0.65)';
                 }}
               >
-                Discover
+                {t('heroDiscover')}
               </Link>
             </motion.div>
           </motion.div>
@@ -364,7 +373,7 @@ export default function Hero() {
             color: 'rgba(255,255,255,0.15)',
           }}
         >
-          Scroll
+          {t('heroScroll')}
         </span>
       </motion.div>
 

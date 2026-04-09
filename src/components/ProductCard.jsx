@@ -1,8 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useLang } from '../context/LangContext';
 
 export default function ProductCard({ product, index = 0 }) {
+  const { t } = useLang();
   const [hovered, setHovered] = useState(false);
   const imgRef = useRef(null);
   const hasImage = product.images && product.images.length > 0;
@@ -89,7 +91,7 @@ export default function ProductCard({ product, index = 0 }) {
                 padding: '5px 12px',
               }}
             >
-              New
+              {t('new')}
             </div>
           )}
 

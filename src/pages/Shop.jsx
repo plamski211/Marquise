@@ -4,8 +4,10 @@ import { motion } from 'framer-motion';
 import ProductCard from '../components/ProductCard';
 import { useProducts } from '../context/ProductContext';
 import { categories } from '../data/defaultProducts';
+import { useLang } from '../context/LangContext';
 
 export default function Shop() {
+  const { t } = useLang();
   const { products, getByCategory, getNew } = useProducts();
   const [searchParams] = useSearchParams();
   const isNewFilter = searchParams.get('filter') === 'new';
@@ -35,8 +37,8 @@ export default function Shop() {
             transition={{ duration: 0.5 }}
             style={{ marginBottom: '0' }}
           >
-            {activeCategory === 'All' ? 'Collection' :
-             activeCategory === 'New' ? 'New Arrivals' : activeCategory}
+            {activeCategory === 'All' ? t('collection') :
+             activeCategory === 'New' ? t('newArrivals') : activeCategory}
           </motion.h1>
         </div>
       </section>
@@ -105,10 +107,10 @@ export default function Shop() {
               backgroundRepeat: 'no-repeat',
               backgroundPosition: 'right center',
             }}>
-              <option value="newest">Newest</option>
-              <option value="price-asc">Price Asc</option>
-              <option value="price-desc">Price Desc</option>
-              <option value="name">A — Z</option>
+              <option value="newest">{t('newest')}</option>
+              <option value="price-asc">{t('priceAsc')}</option>
+              <option value="price-desc">{t('priceDesc')}</option>
+              <option value="name">{t('aToZ')}</option>
             </select>
           </div>
         </div>
@@ -120,7 +122,7 @@ export default function Shop() {
           {displayProducts.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px 0' }}>
               <p style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', color: 'var(--text-mid)' }}>
-                No pieces yet
+                {t('noPiecesYet')}
               </p>
             </div>
           ) : (

@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useLang } from '../context/LangContext';
 
 export default function Footer() {
+  const { t } = useLang();
   const [email, setEmail] = useState('');
   const [done, setDone] = useState(false);
 
@@ -28,22 +30,22 @@ export default function Footer() {
               fontWeight: 300,
               marginBottom: '6px',
             }}>
-              Stay with Marquise
+              {t('footerStay')}
             </h3>
             <p style={{ fontSize: '0.82rem', fontWeight: 300, color: 'rgba(255,255,255,0.35)' }}>
-              New arrivals and exclusive previews.
+              {t('footerNewArrivals')}
             </p>
           </div>
 
           {done ? (
             <p style={{ fontSize: '0.72rem', fontWeight: 400, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.5)' }}>
-              Thank you
+              {t('thankYou')}
             </p>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', maxWidth: '400px', width: '100%' }}>
               <input
                 type="email" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="Email address" required
+                placeholder={t('emailPlaceholder')} required
                 style={{
                   flex: 1, padding: '14px 16px',
                   background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRight: 'none',
@@ -55,7 +57,7 @@ export default function Footer() {
                 fontFamily: 'var(--sans)', fontSize: '0.6rem', fontWeight: 500,
                 letterSpacing: '0.18em', textTransform: 'uppercase', border: 'none', cursor: 'pointer',
               }}>
-                Join
+                {t('join')}
               </button>
             </form>
           )}
@@ -71,14 +73,28 @@ export default function Footer() {
               opacity: 0.9,
             }} />
             <p style={{ fontSize: '0.82rem', fontWeight: 300, color: 'rgba(255,255,255,0.3)', maxWidth: '260px', lineHeight: 1.6 }}>
-              Timeless design, modern sensibility.
+              {t('footerTagline')}
             </p>
           </div>
 
           {[
-            { title: 'Shop', items: ['New Arrivals', 'Dresses', 'Outerwear', 'Accessories'] },
-            { title: 'Marquise', items: ['Our Story', 'Craftsmanship', 'Sustainability'] },
-            { title: 'Help', items: ['Contact', 'Shipping', 'Returns', 'Size Guide'] },
+            { title: t('shop'), items: [
+              { label: t('newArrivals'), to: '/shop' },
+              { label: t('dresses'), to: '/shop' },
+              { label: t('outerwear'), to: '/shop' },
+              { label: t('accessories'), to: '/shop' },
+            ]},
+            { title: 'Marquise', items: [
+              { label: t('ourStory'), to: '/about' },
+              { label: t('craftsmanship'), to: '/about' },
+              { label: t('sustainability'), to: '/about' },
+            ]},
+            { title: t('help'), items: [
+              { label: t('contact'), to: '/contact' },
+              { label: t('shipping'), to: '/shipping-info' },
+              { label: t('returns'), to: '/returns' },
+              { label: t('sizeGuide'), to: '/size-guide' },
+            ]},
           ].map(col => (
             <div key={col.title}>
               <p style={{
@@ -89,7 +105,7 @@ export default function Footer() {
                 {col.title}
               </p>
               {col.items.map(item => (
-                <Link key={item} to="/shop" style={{
+                <Link key={item.label} to={item.to} style={{
                   display: 'block', fontSize: '0.82rem', fontWeight: 300,
                   color: 'rgba(255,255,255,0.35)', marginBottom: '12px',
                   transition: 'color 0.2s ease',
@@ -97,7 +113,7 @@ export default function Footer() {
                   onMouseEnter={e => e.target.style.color = 'rgba(255,255,255,0.8)'}
                   onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.35)'}
                 >
-                  {item}
+                  {item.label}
                 </Link>
               ))}
             </div>
@@ -114,8 +130,11 @@ export default function Footer() {
             &copy; {new Date().getFullYear()} Marquise
           </p>
           <div style={{ display: 'flex', gap: '20px' }}>
-            {['Privacy', 'Terms'].map(t => (
-              <span key={t} style={{ fontSize: '0.7rem', fontWeight: 300, color: 'rgba(255,255,255,0.2)', cursor: 'pointer' }}>{t}</span>
+            {[{ label: t('privacy'), to: '/privacy' }, { label: t('terms'), to: '/terms' }].map(item => (
+              <Link key={item.label} to={item.to} style={{ fontSize: '0.7rem', fontWeight: 300, color: 'rgba(255,255,255,0.2)', textDecoration: 'none' }}
+                onMouseEnter={e => e.target.style.color = 'rgba(255,255,255,0.5)'}
+                onMouseLeave={e => e.target.style.color = 'rgba(255,255,255,0.2)'}
+              >{item.label}</Link>
             ))}
           </div>
         </div>
