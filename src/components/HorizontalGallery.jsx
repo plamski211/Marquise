@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
@@ -7,7 +7,31 @@ import { assetUrl } from '../lib/api';
 
 export default function HorizontalGallery({ products }) {
   const { t } = useLang();
+  const trackRef = useRef(null);
+  const wrapRef = useRef(null);
+  const [constraint, setConstraint] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(-1);
+
+  const measure = useCallback(() => {
+    const track = trackRef.current;
+    const wrap = wrapRef.current;
+    if (track && wrap) {
+      setConstraint(Math.min(0, -(track.scrollWidth - wrap.offsetWidth)));
+    }
+  }, []);
+
+  useEffect(() => {
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [products, measure]);
+
+  // Remeasure once images paint
+  useEffect(() => {
+    const timer = setTimeout(measure, 500);
+    return () => clearTimeout(timer);
+  }, [products, measure]);
 
   if (!products || products.length === 0) return null;
 
@@ -50,125 +74,133 @@ export default function HorizontalGallery({ products }) {
         </ScrollReveal>
       </div>
 
-      {/* Scroll track — plain overflow, no scroll hijack */}
-      <div
-        className="gallery-scroll"
-        style={{
-          display: 'flex',
-          gap: 'clamp(12px, 1.4vw, 18px)',
-          paddingLeft: 'var(--px)',
-          paddingRight: 'clamp(40px, 8vw, 100px)',
-          overflowX: 'auto',
-          WebkitOverflowScrolling: 'touch',
-        }}
-      >
-        {products.map((product, i) => {
-          const hasImage = product.images && product.images.length > 0;
-          const isHov = hoveredIdx === i;
+      {/* overflow:hidden — no browser scroll, only framer drag */}
+      <div ref={wrapRef} style={{ overflow: 'hidden' }}>
+        <motion.div
+          ref={trackRef}
+          drag="x"
+          dragConstraints={{ left: constraint, right: 0 }}
+          dragElastic={0.08}
+          dragTransition={{ bounceStiffness: 300, bounceDamping: 30 }}
+          onDragStart={() => setIsDragging(true)}
+          onDragEnd={() => setTimeout(() => setIsDragging(false), 200)}
+          style={{
+            display: 'flex',
+            gap: 'clamp(12px, 1.4vw, 18px)',
+            paddingLeft: 'var(--px)',
+            paddingRight: 'clamp(40px, 8vw, 100px)',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none',
+            touchAction: 'pan-y',
+          }}
+        >
+          {products.map((product, i) => {
+            const hasImage = product.images && product.images.length > 0;
+            const isHov = hoveredIdx === i;
 
-          return (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: '-20px' }}
-              transition={{ duration: 0.55, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-              style={{
-                minWidth: 'clamp(160px, 14vw, 220px)',
-                flexShrink: 0,
-              }}
-              onMouseEnter={() => setHoveredIdx(i)}
-              onMouseLeave={() => setHoveredIdx(-1)}
-            >
-              <Link
-                to={`/product/${product.id}`}
-                draggable={false}
-                style={{ display: 'block' }}
+            return (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-20px' }}
+                transition={{ duration: 0.55, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  minWidth: 'clamp(160px, 14vw, 220px)',
+                  flexShrink: 0,
+                }}
+                onMouseEnter={() => setHoveredIdx(i)}
+                onMouseLeave={() => setHoveredIdx(-1)}
               >
-                {/* Image */}
-                <div
+                <Link
+                  to={`/product/${product.id}`}
+                  onClick={(e) => isDragging && e.preventDefault()}
+                  draggable={false}
                   style={{
-                    aspectRatio: '3 / 4',
-                    overflow: 'hidden',
-                    position: 'relative',
-                    marginBottom: '12px',
-                    background: '#F5F3F0',
+                    display: 'block',
+                    pointerEvents: isDragging ? 'none' : 'auto',
                   }}
                 >
-                  {hasImage ? (
-                    <img
-                      src={assetUrl(product.images[0])}
-                      alt={product.name}
-                      draggable={false}
-                      loading="lazy"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'cover',
-                        transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
-                        transform: isHov ? 'scale(1.04)' : 'scale(1)',
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        background: product.gradient || '#F5F3F0',
-                      }}
-                    />
-                  )}
-
-                  {/* Hover reveal line at bottom */}
+                  {/* Image */}
                   <div
                     style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: '2px',
-                      background: 'var(--accent, #8B7355)',
-                      transform: isHov ? 'scaleX(1)' : 'scaleX(0)',
-                      transformOrigin: 'left',
-                      transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                      aspectRatio: '3 / 4',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      marginBottom: '12px',
+                      background: '#F5F3F0',
                     }}
-                  />
-                </div>
+                  >
+                    {hasImage ? (
+                      <img
+                        src={assetUrl(product.images[0])}
+                        alt={product.name}
+                        draggable={false}
+                        loading="lazy"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover',
+                          transition: 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                          transform: isHov ? 'scale(1.04)' : 'scale(1)',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          background: product.gradient || '#F5F3F0',
+                        }}
+                      />
+                    )}
 
-                {/* Info */}
-                <h4
-                  style={{
-                    fontFamily: 'var(--serif)',
-                    fontSize: '0.88rem',
-                    fontWeight: 400,
-                    color: 'var(--text)',
-                    marginBottom: '3px',
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {product.name}
-                </h4>
-                <p
-                  style={{
-                    fontFamily: 'var(--sans)',
-                    fontSize: '0.7rem',
-                    fontWeight: 300,
-                    color: 'var(--text-light)',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  ${product.price}
-                </p>
-              </Link>
-            </motion.div>
-          );
-        })}
+                    {/* Hover reveal line */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        height: '2px',
+                        background: 'var(--accent, #8B7355)',
+                        transform: isHov ? 'scaleX(1)' : 'scaleX(0)',
+                        transformOrigin: 'left',
+                        transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                    />
+                  </div>
+
+                  {/* Info */}
+                  <h4
+                    style={{
+                      fontFamily: 'var(--serif)',
+                      fontSize: '0.88rem',
+                      fontWeight: 400,
+                      color: 'var(--text)',
+                      marginBottom: '3px',
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {product.name}
+                  </h4>
+                  <p
+                    style={{
+                      fontFamily: 'var(--sans)',
+                      fontSize: '0.7rem',
+                      fontWeight: 300,
+                      color: 'var(--text-light)',
+                      letterSpacing: '0.02em',
+                    }}
+                  >
+                    ${product.price}
+                  </p>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
       </div>
-
-      <style>{`
-        .gallery-scroll::-webkit-scrollbar { display: none; }
-        .gallery-scroll { scrollbar-width: none; }
-      `}</style>
     </section>
   );
 }
