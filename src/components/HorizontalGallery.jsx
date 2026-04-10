@@ -207,13 +207,13 @@ export default function HorizontalGallery({ products }) {
         .gallery-scroll-mobile::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
           .gallery-card {
-            min-width: 44vw;
+            min-width: 32vw;
             scroll-snap-align: start;
           }
         }
         @media (max-width: 480px) {
           .gallery-card {
-            min-width: 52vw;
+            min-width: 36vw;
           }
         }
       `}</style>
