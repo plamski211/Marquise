@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
@@ -7,24 +7,7 @@ import { assetUrl } from '../lib/api';
 
 export default function HorizontalGallery({ products }) {
   const { t } = useLang();
-  const scrollRef = useRef(null);
   const [hoveredIdx, setHoveredIdx] = useState(-1);
-
-  // Convert vertical scroll to horizontal
-  const handleWheel = useCallback((e) => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (maxScroll <= 0) return;
-
-    // If we can scroll horizontally, hijack the vertical scroll
-    const atStart = el.scrollLeft <= 0 && e.deltaY < 0;
-    const atEnd = el.scrollLeft >= maxScroll - 1 && e.deltaY > 0;
-    if (!atStart && !atEnd) {
-      e.preventDefault();
-      el.scrollLeft += e.deltaY;
-    }
-  }, []);
 
   if (!products || products.length === 0) return null;
 
@@ -67,25 +50,18 @@ export default function HorizontalGallery({ products }) {
         </ScrollReveal>
       </div>
 
-      {/* Scroll track */}
+      {/* Scroll track — plain overflow, no scroll hijack */}
       <div
-        ref={scrollRef}
-        onWheel={handleWheel}
+        className="gallery-scroll"
         style={{
           display: 'flex',
-          gap: 'clamp(14px, 1.6vw, 22px)',
+          gap: 'clamp(12px, 1.4vw, 18px)',
           paddingLeft: 'var(--px)',
           paddingRight: 'clamp(40px, 8vw, 100px)',
           overflowX: 'auto',
-          scrollBehavior: 'smooth',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
           WebkitOverflowScrolling: 'touch',
         }}
       >
-        <style>{`
-          div::-webkit-scrollbar { display: none; }
-        `}</style>
         {products.map((product, i) => {
           const hasImage = product.images && product.images.length > 0;
           const isHov = hoveredIdx === i;
@@ -98,7 +74,7 @@ export default function HorizontalGallery({ products }) {
               viewport={{ once: true, margin: '-20px' }}
               transition={{ duration: 0.55, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                minWidth: 'clamp(200px, 17vw, 270px)',
+                minWidth: 'clamp(160px, 14vw, 220px)',
                 flexShrink: 0,
               }}
               onMouseEnter={() => setHoveredIdx(i)}
@@ -115,7 +91,7 @@ export default function HorizontalGallery({ products }) {
                     aspectRatio: '3 / 4',
                     overflow: 'hidden',
                     position: 'relative',
-                    marginBottom: '14px',
+                    marginBottom: '12px',
                     background: '#F5F3F0',
                   }}
                 >
@@ -163,7 +139,7 @@ export default function HorizontalGallery({ products }) {
                 <h4
                   style={{
                     fontFamily: 'var(--serif)',
-                    fontSize: '0.92rem',
+                    fontSize: '0.88rem',
                     fontWeight: 400,
                     color: 'var(--text)',
                     marginBottom: '3px',
@@ -175,7 +151,7 @@ export default function HorizontalGallery({ products }) {
                 <p
                   style={{
                     fontFamily: 'var(--sans)',
-                    fontSize: '0.72rem',
+                    fontSize: '0.7rem',
                     fontWeight: 300,
                     color: 'var(--text-light)',
                     letterSpacing: '0.02em',
@@ -188,6 +164,11 @@ export default function HorizontalGallery({ products }) {
           );
         })}
       </div>
+
+      <style>{`
+        .gallery-scroll::-webkit-scrollbar { display: none; }
+        .gallery-scroll { scrollbar-width: none; }
+      `}</style>
     </section>
   );
 }
