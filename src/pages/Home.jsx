@@ -107,8 +107,10 @@ export default function Home() {
         }
         @media (max-width: 540px) {
           .home-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px 12px;
+            grid-template-columns: 1fr;
+            max-width: 380px;
+            margin-left: auto;
+            margin-right: auto;
           }
         }
       `}</style>

@@ -170,8 +170,9 @@ export default function Shop() {
         }
         @media (max-width: 540px) {
           .shop-grid {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px 12px;
+            grid-template-columns: 1fr;
+            max-width: 380px;
+            margin: 0 auto;
           }
         }
       `}</style>

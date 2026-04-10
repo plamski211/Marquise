@@ -216,7 +216,8 @@ export default function HorizontalGallery({ products }) {
             display: none;
           }
           .gallery-card {
-            min-width: 38vw;
+            flex: 0 0 28vw;
+            min-width: 0;
             scroll-snap-align: start;
           }
         }
@@ -228,7 +229,8 @@ export default function HorizontalGallery({ products }) {
             margin-bottom: 12px !important;
           }
           .gallery-card {
-            min-width: 42vw;
+            flex: 0 0 32vw;
+            min-width: 0;
           }
         }
       `}</style>
