@@ -1,4 +1,4 @@
--- Migration 008: Seed Bulgarian translations for all products
+-- Migration 009: Re-apply Bulgarian translations (fixes 008 which may have targeted wrong slugs)
 
 UPDATE products SET
   name_bg = 'Яке Пеплум с Дантелени Орнаменти и Качулка',
