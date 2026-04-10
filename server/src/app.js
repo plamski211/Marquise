@@ -16,8 +16,14 @@ import cartRouter from './routes/cart.js';
 import authRouter from './routes/auth.js';
 import ordersRouter from './routes/orders.js';
 import { router as checkoutRouter, webhookHandler } from './routes/checkout.js';
+import contactRouter from './routes/contact.js';
 
 const app = express();
+
+// Trust proxy in production (needed for HTTPS behind reverse proxy / load balancer)
+if (env.isProd) {
+  app.set('trust proxy', 1);
+}
 
 // Security headers
 app.use(helmet({
@@ -55,7 +61,7 @@ app.use(session(sessionConfig));
 // Global rate limit
 app.use(rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many requests, please try again later' },
@@ -86,6 +92,7 @@ app.use('/api/cart', cartRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/orders', ordersRouter);
 app.use('/api/checkout', checkoutRouter);
+app.use('/api/contact', contactRouter);
 
 // 404 for unmatched API routes
 app.use('/api/*', (_req, res) => {

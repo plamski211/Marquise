@@ -1,16 +1,27 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useLang } from '../context/LangContext';
+import { api } from '../lib/api';
 
 export default function Contact() {
   const { t } = useLang();
   const [form, setForm] = useState({ name: '', email: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // For now, just show success — wire to a backend/email service later
-    setSent(true);
+    setSending(true);
+    setError('');
+    try {
+      await api.post('/api/contact', form);
+      setSent(true);
+    } catch {
+      setError(t('contactError'));
+    } finally {
+      setSending(false);
+    }
   };
 
   const inputStyle = {
@@ -84,8 +95,9 @@ export default function Contact() {
                   onBlur={e => e.target.style.borderColor = 'var(--border)'}
                 />
               </div>
-              <button type="submit" className="btn btn-filled" style={{ padding: '16px', width: '100%' }}>
-                {t('contactSend')}
+              {error && <p style={{ color: 'var(--danger, #c44)', fontSize: '0.82rem', fontWeight: 300 }}>{error}</p>}
+              <button type="submit" className="btn btn-filled" style={{ padding: '16px', width: '100%', opacity: sending ? 0.6 : 1 }} disabled={sending}>
+                {sending ? '...' : t('contactSend')}
               </button>
             </form>
           )}

@@ -207,6 +207,7 @@ export const translations = {
     contactMessage: 'Message',
     contactSend: 'Send Message',
     contactEmail: 'Email',
+    contactError: 'Something went wrong. Please try again or email us directly.',
 
     // Shipping
     shippingTitle: 'Shipping Information',
@@ -480,6 +481,7 @@ export const translations = {
     contactMessage: 'Съобщение',
     contactSend: 'Изпрати',
     contactEmail: 'Имейл',
+    contactError: 'Нещо се обърка. Моля, опитайте отново или ни пишете директно.',
 
     // Shipping
     shippingTitle: 'Информация за доставка',

@@ -30,5 +30,8 @@ export const env = {
   adminInitialPassword: process.env.ADMIN_INITIAL_PASSWORD,
   stripeSecretKey: process.env.STRIPE_SECRET_KEY,
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+  smtpUser: process.env.SMTP_USER || '',
+  smtpPass: process.env.SMTP_PASS || '',
+  contactEmail: process.env.CONTACT_EMAIL || 'marquise.help@gmail.com',
   isProd: process.env.NODE_ENV === 'production',
 };
