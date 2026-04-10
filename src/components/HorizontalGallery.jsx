@@ -1,5 +1,5 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, useMotionValue, useAnimation } from 'framer-motion';
+import { useRef, useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
 import { useLang } from '../context/LangContext';
@@ -8,28 +8,40 @@ import { assetUrl } from '../lib/api';
 export default function HorizontalGallery({ products }) {
   const { t } = useLang();
   const trackRef = useRef(null);
+  const containerRef = useRef(null);
   const [constraint, setConstraint] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredIdx, setHoveredIdx] = useState(-1);
+  const [imagesLoaded, setImagesLoaded] = useState(0);
+
+  const measure = useCallback(() => {
+    const el = trackRef.current;
+    const parent = containerRef.current;
+    if (el && parent) {
+      const total = el.scrollWidth;
+      const view = parent.offsetWidth;
+      setConstraint(Math.min(0, -(total - view)));
+    }
+  }, []);
 
   useEffect(() => {
-    const measure = () => {
-      const el = trackRef.current;
-      if (el) {
-        const total = el.scrollWidth;
-        const view = el.parentElement.offsetWidth;
-        setConstraint(Math.min(0, -(total - view)));
-      }
-    };
     measure();
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [products]);
+  }, [products, measure]);
+
+  // Remeasure after images load
+  useEffect(() => {
+    measure();
+  }, [imagesLoaded, measure]);
 
   if (!products || products.length === 0) return null;
 
   return (
-    <section style={{ padding: 'clamp(100px, 14vh, 180px) 0', overflow: 'hidden' }}>
+    <section
+      ref={containerRef}
+      style={{ padding: 'clamp(100px, 14vh, 180px) 0', overflow: 'hidden' }}
+    >
       {/* Header */}
       <div className="container" style={{ marginBottom: '56px' }}>
         <ScrollReveal>
@@ -97,7 +109,7 @@ export default function HorizontalGallery({ products }) {
               viewport={{ once: true, margin: '-20px' }}
               transition={{ duration: 0.6, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
               style={{
-                minWidth: 'clamp(280px, 26vw, 400px)',
+                minWidth: 'clamp(260px, 22vw, 340px)',
                 flexShrink: 0,
               }}
               onMouseEnter={() => setHoveredIdx(i)}
@@ -115,10 +127,11 @@ export default function HorizontalGallery({ products }) {
                 {/* Image */}
                 <div
                   style={{
-                    aspectRatio: '3 / 4.2',
+                    aspectRatio: '3 / 4',
                     overflow: 'hidden',
                     position: 'relative',
                     marginBottom: '20px',
+                    background: '#F5F3F0',
                   }}
                 >
                   {hasImage ? (
@@ -126,12 +139,13 @@ export default function HorizontalGallery({ products }) {
                       src={assetUrl(product.images[0])}
                       alt={product.name}
                       draggable={false}
+                      onLoad={() => setImagesLoaded(c => c + 1)}
                       style={{
                         width: '100%',
                         height: '100%',
                         objectFit: 'cover',
                         transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
-                        transform: isHov ? 'scale(1.06)' : 'scale(1)',
+                        transform: isHov ? 'scale(1.05)' : 'scale(1)',
                       }}
                     />
                   ) : (
@@ -139,38 +153,22 @@ export default function HorizontalGallery({ products }) {
                       style={{
                         width: '100%',
                         height: '100%',
-                        background: product.gradient || 'var(--bg-alt)',
-                        transition: 'transform 0.9s cubic-bezier(0.16, 1, 0.3, 1)',
-                        transform: isHov ? 'scale(1.06)' : 'scale(1)',
-                        display: 'flex',
-                        alignItems: 'flex-end',
-                        padding: '32px',
+                        background: product.gradient || '#F5F3F0',
                       }}
-                    >
-                      <span
-                        style={{
-                          fontFamily: 'var(--serif)',
-                          fontSize: '1.1rem',
-                          fontStyle: 'italic',
-                          color: 'rgba(255,255,255,0.15)',
-                        }}
-                      >
-                        {product.category}
-                      </span>
-                    </div>
+                    />
                   )}
 
-                  {/* Number overlay */}
+                  {/* Subtle number overlay */}
                   <div
                     style={{
                       position: 'absolute',
-                      top: '20px',
-                      left: '20px',
+                      top: '16px',
+                      left: '16px',
                       fontFamily: 'var(--sans)',
-                      fontSize: '0.5rem',
+                      fontSize: '0.48rem',
                       fontWeight: 500,
                       letterSpacing: '0.2em',
-                      color: 'rgba(255,255,255,0.2)',
+                      color: 'rgba(0,0,0,0.15)',
                     }}
                   >
                     {String(i + 1).padStart(2, '0')}
@@ -179,21 +177,21 @@ export default function HorizontalGallery({ products }) {
                   {/* "View" indicator on hover */}
                   <motion.div
                     initial={false}
-                    animate={{ opacity: isHov ? 1 : 0, scale: isHov ? 1 : 0.8 }}
-                    transition={{ duration: 0.3 }}
+                    animate={{ opacity: isHov ? 1 : 0, y: isHov ? 0 : 6 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
                     style={{
                       position: 'absolute',
-                      bottom: '20px',
-                      right: '20px',
+                      bottom: '16px',
+                      right: '16px',
                       fontFamily: 'var(--sans)',
-                      fontSize: '0.5rem',
+                      fontSize: '0.48rem',
                       fontWeight: 500,
                       letterSpacing: '0.25em',
                       textTransform: 'uppercase',
                       color: '#fff',
-                      background: 'rgba(0,0,0,0.4)',
-                      backdropFilter: 'blur(8px)',
-                      padding: '8px 16px',
+                      background: 'rgba(0,0,0,0.35)',
+                      backdropFilter: 'blur(12px)',
+                      padding: '7px 14px',
                     }}
                   >
                     {t('view')}
@@ -204,12 +202,11 @@ export default function HorizontalGallery({ products }) {
                 <h4
                   style={{
                     fontFamily: 'var(--serif)',
-                    fontSize: '1.15rem',
+                    fontSize: '1.05rem',
                     fontWeight: 400,
                     color: 'var(--text)',
-                    marginBottom: '5px',
+                    marginBottom: '4px',
                     lineHeight: 1.3,
-                    transition: 'color 0.3s ease',
                   }}
                 >
                   {product.name}
@@ -217,9 +214,10 @@ export default function HorizontalGallery({ products }) {
                 <p
                   style={{
                     fontFamily: 'var(--sans)',
-                    fontSize: '0.82rem',
+                    fontSize: '0.78rem',
                     fontWeight: 300,
                     color: 'var(--text-light)',
+                    letterSpacing: '0.02em',
                   }}
                 >
                   ${product.price}
@@ -229,8 +227,6 @@ export default function HorizontalGallery({ products }) {
           );
         })}
       </motion.div>
-
-      {/* responsive padding now handled by var(--px) */}
     </section>
   );
 }
