@@ -3,6 +3,7 @@ import { motion, useMotionValue, useAnimation } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ScrollReveal from './ScrollReveal';
 import { useLang } from '../context/LangContext';
+import { assetUrl } from '../lib/api';
 
 export default function HorizontalGallery({ products }) {
   const { t } = useLang();
@@ -122,7 +123,7 @@ export default function HorizontalGallery({ products }) {
                 >
                   {hasImage ? (
                     <img
-                      src={product.images[0]}
+                      src={assetUrl(product.images[0])}
                       alt={product.name}
                       draggable={false}
                       style={{

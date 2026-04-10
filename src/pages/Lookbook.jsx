@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import ScrollReveal from '../components/ScrollReveal';
 import { useProducts } from '../context/ProductContext';
 import { useLang } from '../context/LangContext';
+import { assetUrl } from '../lib/api';
 
 export default function Lookbook() {
   const { t } = useLang();
@@ -161,7 +162,7 @@ export default function Lookbook() {
                       }}>
                         {product.images?.[0] ? (
                           <img
-                            src={product.images[0]}
+                            src={assetUrl(product.images[0])}
                             alt={product.name}
                             style={{
                               width: '100%',
