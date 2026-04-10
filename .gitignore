@@ -14,7 +14,7 @@ dist-ssr
 
 # Server
 server/.env
-uploads/
+# uploads kept in git so product images survive Railway deployments
 
 # Editor directories and files
 .vscode/*
