@@ -26,6 +26,7 @@ export default function Home() {
       {/* New Arrivals grid */}
       {newArrivals.length > 0 && (
         <section
+          className="new-arrivals-section"
           style={{
             padding: 'clamp(100px, 14vh, 180px) 0',
             background: 'var(--bg-alt)',
@@ -34,6 +35,7 @@ export default function Home() {
           <div className="container">
             <ScrollReveal>
               <div
+                className="new-arrivals-header"
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
@@ -95,12 +97,18 @@ export default function Home() {
         @media (max-width: 1024px) {
           .home-grid { grid-template-columns: repeat(2, 1fr); }
         }
+        @media (max-width: 768px) {
+          .new-arrivals-section {
+            padding: 56px 0 !important;
+          }
+          .new-arrivals-header {
+            margin-bottom: 32px !important;
+          }
+        }
         @media (max-width: 540px) {
           .home-grid {
-            grid-template-columns: 1fr;
-            max-width: 380px;
-            margin-left: auto;
-            margin-right: auto;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px 12px;
           }
         }
       `}</style>

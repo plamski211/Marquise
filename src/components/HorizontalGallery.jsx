@@ -127,8 +127,8 @@ export default function HorizontalGallery({ products }) {
   });
 
   return (
-    <section style={{ padding: 'clamp(60px, 10vh, 150px) 0' }}>
-      <div className="container" style={{ marginBottom: 'clamp(28px, 4vh, 40px)' }}>
+    <section className="hg-section" style={{ padding: 'clamp(60px, 10vh, 150px) 0' }}>
+      <div className="container hg-header" style={{ marginBottom: 'clamp(28px, 4vh, 40px)' }}>
         <ScrollReveal>
           <div style={{
             display: 'flex',
@@ -143,7 +143,7 @@ export default function HorizontalGallery({ products }) {
               </p>
               <h2 style={{ lineHeight: 1.05 }}>{t('explore')}</h2>
             </div>
-            <p style={{
+            <p className="hg-hint" style={{
               fontFamily: 'var(--sans)',
               fontSize: '0.6rem',
               fontWeight: 400,
@@ -206,14 +206,29 @@ export default function HorizontalGallery({ products }) {
         }
         .gallery-scroll-mobile::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
+          .hg-section {
+            padding: 32px 0 40px !important;
+          }
+          .hg-header {
+            margin-bottom: 16px !important;
+          }
+          .hg-hint {
+            display: none;
+          }
           .gallery-card {
-            min-width: 32vw;
+            min-width: 38vw;
             scroll-snap-align: start;
           }
         }
         @media (max-width: 480px) {
+          .hg-section {
+            padding: 24px 0 32px !important;
+          }
+          .hg-header {
+            margin-bottom: 12px !important;
+          }
           .gallery-card {
-            min-width: 36vw;
+            min-width: 42vw;
           }
         }
       `}</style>

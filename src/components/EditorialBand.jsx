@@ -20,6 +20,7 @@ export default function EditorialBand() {
   return (
     <section
       ref={ref}
+      className="editorial-section"
       style={{
         position: 'relative',
         overflow: 'hidden',
@@ -237,6 +238,16 @@ export default function EditorialBand() {
           .editorial-grid {
             grid-template-columns: 1fr !important;
             gap: 48px !important;
+          }
+        }
+        @media (max-width: 768px) {
+          .editorial-section {
+            padding: 64px 0 !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .editorial-section {
+            padding: 48px 0 !important;
           }
         }
       `}</style>
