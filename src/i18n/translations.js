@@ -63,7 +63,7 @@ export const translations = {
     // Horizontal Gallery
     theCollection: 'The Collection',
     explore: 'Explore',
-    dragToExplore: 'Drag to explore\u2192',
+    dragToExplore: 'Scroll to explore \u2192',
     view: 'View',
 
     // Intro
@@ -337,7 +337,7 @@ export const translations = {
     // Horizontal Gallery
     theCollection: '\u041A\u043E\u043B\u0435\u043A\u0446\u0438\u044F\u0442\u0430',
     explore: '\u0420\u0430\u0437\u0433\u043B\u0435\u0434\u0430\u0439',
-    dragToExplore: '\u041F\u043B\u044A\u0437\u043D\u0438 \u0437\u0430 \u0440\u0430\u0437\u0433\u043B\u0435\u0436\u0434\u0430\u043D\u0435\u2192',
+    dragToExplore: '\u041F\u043B\u044A\u0437\u043D\u0438 \u0437\u0430 \u0440\u0430\u0437\u0433\u043B\u0435\u0436\u0434\u0430\u043D\u0435 \u2192',
     view: '\u0412\u0438\u0436',
 
     // Intro

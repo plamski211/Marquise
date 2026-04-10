@@ -20,7 +20,7 @@ export async function listProducts({ category, featured, isNew, sort } = {}) {
 
   const whereClause = where.length > 0 ? `WHERE ${where.join(' AND ')}` : '';
 
-  let orderBy = 'p.created_at DESC';
+  let orderBy = 'p.sort_order ASC, p.created_at DESC';
   if (sort === 'price_asc') orderBy = 'p.price ASC';
   else if (sort === 'price_desc') orderBy = 'p.price DESC';
   else if (sort === 'name') orderBy = 'p.name ASC';
