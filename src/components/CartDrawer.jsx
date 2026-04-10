@@ -6,7 +6,7 @@ import { api, assetUrl } from '../lib/api';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, removeItem, updateQty, totalPrice } = useCart();
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const [checkingOut, setCheckingOut] = useState(false);
 
   return (
@@ -72,13 +72,13 @@ export default function CartDrawer() {
                       </div>
 
                       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <h4 style={{ fontFamily: 'var(--serif)', fontSize: '0.95rem', fontWeight: 400, marginBottom: '3px' }}>{item.name}</h4>
+                        <h4 style={{ fontFamily: 'var(--serif)', fontSize: '0.95rem', fontWeight: 400, marginBottom: '3px' }}>{tp(item, 'name')}</h4>
                         {(item.size || item.color) && (
                           <p style={{ fontSize: '0.7rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '3px' }}>
                             {[item.size, item.color].filter(Boolean).join(' / ')}
                           </p>
                         )}
-                        <p style={{ fontSize: '0.82rem', fontWeight: 400, marginBottom: '10px' }}>${item.price}</p>
+                        <p style={{ fontSize: '0.82rem', fontWeight: 400, marginBottom: '10px' }}>€{item.price}</p>
 
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
                           <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)' }}>
@@ -114,7 +114,7 @@ export default function CartDrawer() {
               <div style={{ padding: '20px clamp(16px, 4vw, 28px)', borderTop: '1px solid var(--border)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                   <span className="label">{t('subtotal')}</span>
-                  <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>${totalPrice.toFixed(2)}</span>
+                  <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>€{totalPrice.toFixed(2)}</span>
                 </div>
                 <p style={{ fontSize: '0.72rem', fontWeight: 300, color: 'var(--text-light)', marginBottom: '16px' }}>{t('shippingAtCheckout')}</p>
                 <button className="btn btn-filled" style={{ width: '100%', padding: '16px', opacity: checkingOut ? 0.6 : 1 }}

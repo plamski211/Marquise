@@ -27,7 +27,7 @@ export async function listProducts({ category, featured, isNew, sort } = {}) {
 
   const { rows } = await pool.query(`
     SELECT
-      p.id, p.name, p.slug, p.price, p.description,
+      p.id, p.name, p.name_bg, p.slug, p.price, p.description, p.description_bg,
       p.featured, p.is_new AS "isNew", p.gradient,
       p.created_at, p.updated_at,
       c.name AS category, c.id AS category_id, c.slug AS category_slug,
@@ -71,7 +71,7 @@ export async function getProductByIdOrSlug(idOrSlug) {
 
   const { rows } = await pool.query(`
     SELECT
-      p.id, p.name, p.slug, p.price, p.description,
+      p.id, p.name, p.name_bg, p.slug, p.price, p.description, p.description_bg,
       p.featured, p.is_new AS "isNew", p.gradient,
       p.created_at, p.updated_at,
       c.name AS category, c.id AS category_id, c.slug AS category_slug,
@@ -116,12 +116,12 @@ export async function createProduct(data) {
     const slug = slugify(data.name);
 
     const { rows } = await client.query(`
-      INSERT INTO products (name, slug, price, category_id, description, featured, is_new, gradient)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      INSERT INTO products (name, name_bg, slug, price, category_id, description, description_bg, featured, is_new, gradient)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
       RETURNING id
     `, [
-      data.name, slug, data.price, data.category_id,
-      data.description || null,
+      data.name, data.name_bg || null, slug, data.price, data.category_id,
+      data.description || null, data.description_bg || null,
       data.featured || false,
       data.is_new ?? true,
       data.gradient || null,
@@ -174,7 +174,7 @@ export async function updateProduct(id, data) {
     const values = [];
     let idx = 1;
 
-    for (const key of ['name', 'price', 'category_id', 'description', 'featured', 'is_new', 'gradient']) {
+    for (const key of ['name', 'name_bg', 'price', 'category_id', 'description', 'description_bg', 'featured', 'is_new', 'gradient']) {
       if (data[key] !== undefined) {
         fields.push(`${key} = $${idx++}`);
         values.push(data[key]);
@@ -254,12 +254,14 @@ function formatProduct(row) {
   return {
     id: row.id,
     name: row.name,
+    name_bg: row.name_bg || null,
     slug: row.slug,
     price: parseFloat(row.price),
     category: row.category,
     category_id: row.category_id,
     category_slug: row.category_slug,
     description: row.description,
+    description_bg: row.description_bg || null,
     featured: row.featured,
     isNew: row.isNew,
     gradient: row.gradient,

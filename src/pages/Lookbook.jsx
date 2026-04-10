@@ -6,7 +6,7 @@ import { useLang } from '../context/LangContext';
 import { assetUrl } from '../lib/api';
 
 export default function Lookbook() {
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const { products } = useProducts();
 
   const looks = [
@@ -208,14 +208,14 @@ export default function Lookbook() {
                         color: isDark ? 'var(--text-inv)' : 'var(--text)',
                         marginBottom: '4px',
                       }}>
-                        {product.name}
+                        {tp(product, 'name')}
                       </h4>
                       <p style={{
                         fontSize: '0.8rem',
                         fontWeight: 300,
                         color: isDark ? 'rgba(250, 248, 245, 0.4)' : 'var(--text-light)',
                       }}>
-                        ${product.price}
+                        €{product.price}
                       </p>
                     </Link>
                   </ScrollReveal>

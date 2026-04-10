@@ -5,7 +5,7 @@ import { useLang } from '../context/LangContext';
 import { assetUrl } from '../lib/api';
 
 export default function ProductCard({ product, index = 0 }) {
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const [hovered, setHovered] = useState(false);
   const imgRef = useRef(null);
   const hasImage = product.images && product.images.length > 0;
@@ -123,7 +123,7 @@ export default function ProductCard({ product, index = 0 }) {
             lineHeight: 1.3,
           }}
         >
-          {product.name}
+          {tp(product, 'name')}
         </h4>
         <p
           style={{
@@ -133,7 +133,7 @@ export default function ProductCard({ product, index = 0 }) {
             color: 'var(--text-light)',
           }}
         >
-          ${product.price}
+          €{product.price}
         </p>
       </Link>
     </motion.div>

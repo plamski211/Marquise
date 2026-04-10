@@ -18,7 +18,16 @@ export function LangProvider({ children }) {
     return translations[lang]?.[key] ?? translations.en[key] ?? key;
   }, [lang]);
 
-  const value = useMemo(() => ({ lang, toggle, t }), [lang, toggle, t]);
+  /** Translate a product field — returns bg version if available, otherwise original */
+  const tp = useCallback((product, field) => {
+    if (lang === 'bg') {
+      const bgValue = product[`${field}_bg`];
+      if (bgValue) return bgValue;
+    }
+    return product[field];
+  }, [lang]);
+
+  const value = useMemo(() => ({ lang, toggle, t, tp }), [lang, toggle, t, tp]);
 
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>;
 }

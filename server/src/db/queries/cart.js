@@ -12,7 +12,7 @@ export async function getCart(req) {
   const { rows } = await pool.query(`
     SELECT
       ci.id, ci.product_id, ci.size, ci.color, ci.quantity,
-      p.name, p.price, p.gradient, p.slug,
+      p.name, p.name_bg, p.price, p.gradient, p.slug,
       (
         SELECT pi.path FROM product_images pi
         WHERE pi.product_id = p.id
@@ -28,6 +28,7 @@ export async function getCart(req) {
     id: r.id,
     product_id: r.product_id,
     name: r.name,
+    name_bg: r.name_bg || null,
     price: parseFloat(r.price),
     size: r.size,
     color: r.color,

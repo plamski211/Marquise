@@ -8,7 +8,7 @@ import { assetUrl } from '../lib/api';
 import ProductCard from '../components/ProductCard';
 
 export default function ProductDetail() {
-  const { t } = useLang();
+  const { t, tp } = useLang();
   const { id } = useParams();
   const { getProduct, products } = useProducts();
   const { addItem } = useCart();
@@ -59,7 +59,7 @@ export default function ProductDetail() {
               <span style={{ fontSize: '0.68rem', color: 'var(--text-light)' }}>/</span>
             </span>
           ))}
-          <span style={{ fontSize: '0.68rem', color: 'var(--text-mid)' }}>{product.name}</span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-mid)' }}>{tp(product, 'name')}</span>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ export default function ProductDetail() {
             lineHeight: 1.1,
             marginBottom: '16px',
           }}>
-            {product.name}
+            {tp(product, 'name')}
           </h1>
 
           <p style={{
@@ -116,10 +116,10 @@ export default function ProductDetail() {
             color: 'var(--text)',
             marginBottom: '32px',
           }}>
-            ${product.price}
+            €{product.price}
           </p>
 
-          {product.description && (
+          {(product.description || product.description_bg) && (
             <p style={{
               fontSize: '0.88rem',
               fontWeight: 300,
@@ -128,7 +128,7 @@ export default function ProductDetail() {
               marginBottom: '40px',
               maxWidth: '480px',
             }}>
-              {product.description}
+              {tp(product, 'description')}
             </p>
           )}
 
@@ -165,7 +165,7 @@ export default function ProductDetail() {
                       fontWeight: 300,
                       color: 'var(--text-mid)',
                     }}>
-                      ${piece.price}
+                      €{piece.price}
                     </span>
                   </div>
                 ))}
@@ -192,7 +192,7 @@ export default function ProductDetail() {
                     fontWeight: 400,
                     color: 'var(--text)',
                   }}>
-                    ${product.price}
+                    €{product.price}
                   </span>
                 </div>
               </div>

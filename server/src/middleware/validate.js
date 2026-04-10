@@ -13,9 +13,11 @@ export function handleValidationErrors(req, res, next) {
 
 export const validateProduct = [
   body('name').trim().isLength({ min: 1, max: 255 }).withMessage('Name is required (max 255 chars)'),
+  body('name_bg').optional({ values: 'null' }).trim().isLength({ max: 255 }),
   body('price').isFloat({ min: 0, max: 99999.99 }).withMessage('Price must be between 0 and 99999.99'),
   body('category_id').isUUID(4).withMessage('Valid category is required'),
   body('description').optional().trim().isLength({ max: 5000 }),
+  body('description_bg').optional({ values: 'null' }).trim().isLength({ max: 5000 }),
   body('featured').optional().isBoolean(),
   body('is_new').optional().isBoolean(),
   body('gradient').optional().trim().isLength({ max: 500 }),
@@ -32,9 +34,11 @@ export const validateProduct = [
 export const validateProductUpdate = [
   param('id').isUUID(4).withMessage('Invalid product ID'),
   body('name').optional().trim().isLength({ min: 1, max: 255 }),
+  body('name_bg').optional({ values: 'null' }).trim().isLength({ max: 255 }),
   body('price').optional().isFloat({ min: 0, max: 99999.99 }),
   body('category_id').optional().isUUID(4),
   body('description').optional().trim().isLength({ max: 5000 }),
+  body('description_bg').optional({ values: 'null' }).trim().isLength({ max: 5000 }),
   body('featured').optional().isBoolean(),
   body('is_new').optional().isBoolean(),
   body('gradient').optional().trim().isLength({ max: 500 }),

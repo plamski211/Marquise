@@ -37,9 +37,11 @@ export default function Admin() {
 
   const makeEmptyProduct = () => ({
     name: '',
+    name_bg: '',
     price: '',
     category: CATEGORIES[0] || 'Dresses',
     description: '',
+    description_bg: '',
     sizes: [],
     colors: [],
     featured: false,
@@ -212,9 +214,11 @@ export default function Admin() {
 
       const productData = {
         name: form.name,
+        name_bg: form.name_bg || null,
         price: parseFloat(form.price),
         category_id: categoryObj.id,
         description: form.description,
+        description_bg: form.description_bg || null,
         featured: form.featured,
         is_new: form.isNew,
         gradient: form.gradient,
@@ -254,9 +258,11 @@ export default function Admin() {
   const handleEdit = (product) => {
     setForm({
       name: product.name,
+      name_bg: product.name_bg || '',
       price: product.price.toString(),
       category: product.category,
       description: product.description || '',
+      description_bg: product.description_bg || '',
       sizes: [...(product.sizes || [])],
       colors: [...(product.colors || [])],
       featured: product.featured || false,
@@ -655,7 +661,7 @@ export default function Admin() {
                     />
                   </div>
                   <div>
-                    <label className="input-label">Price ($)</label>
+                    <label className="input-label">Price (€)</label>
                     <input
                       className="input"
                       type="number"
@@ -667,6 +673,17 @@ export default function Admin() {
                       required
                     />
                   </div>
+                </div>
+
+                {/* Bulgarian name */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label className="input-label">Име (BG)</label>
+                  <input
+                    className="input"
+                    placeholder="напр. Копринена вечерна рокля"
+                    value={form.name_bg}
+                    onChange={e => setForm(p => ({ ...p, name_bg: e.target.value }))}
+                  />
                 </div>
 
                 {/* Category */}
@@ -738,6 +755,18 @@ export default function Admin() {
                     placeholder="Describe the piece, its materials, and craftsmanship..."
                     value={form.description}
                     onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                    rows={4}
+                  />
+                </div>
+
+                {/* Bulgarian Description */}
+                <div style={{ marginBottom: '24px' }}>
+                  <label className="input-label">Описание (BG)</label>
+                  <textarea
+                    className="textarea"
+                    placeholder="Опишете парчето, материалите и изработката..."
+                    value={form.description_bg}
+                    onChange={e => setForm(p => ({ ...p, description_bg: e.target.value }))}
                     rows={4}
                   />
                 </div>
@@ -1041,7 +1070,7 @@ export default function Admin() {
                   width: '80px',
                   textAlign: 'right',
                 }}>
-                  ${product.price}
+                  €{product.price}
                 </span>
 
                 {/* Sizes */}

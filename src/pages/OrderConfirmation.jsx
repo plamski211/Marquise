@@ -100,7 +100,7 @@ export default function OrderConfirmation() {
                   {[item.size, item.color].filter(Boolean).join(' / ')}
                 </p>
               )}
-              <p style={{ fontSize: '0.78rem' }}>{t('qty')} {item.quantity} × ${parseFloat(item.unit_price).toFixed(2)}</p>
+              <p style={{ fontSize: '0.78rem' }}>{t('qty')} {item.quantity} × €{parseFloat(item.unit_price).toFixed(2)}</p>
             </div>
           </div>
         ))}
@@ -110,15 +110,15 @@ export default function OrderConfirmation() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '48px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span className="label">{t('subtotal')}</span>
-          <span style={{ fontSize: '0.85rem' }}>${parseFloat(order.subtotal).toFixed(2)}</span>
+          <span style={{ fontSize: '0.85rem' }}>€{parseFloat(order.subtotal).toFixed(2)}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <span className="label">{t('shipping')}</span>
-          <span style={{ fontSize: '0.85rem' }}>{parseFloat(order.shipping_cost) === 0 ? t('free') : `$${parseFloat(order.shipping_cost).toFixed(2)}`}</span>
+          <span style={{ fontSize: '0.85rem' }}>{parseFloat(order.shipping_cost) === 0 ? t('free') : `€${parseFloat(order.shipping_cost).toFixed(2)}`}</span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '12px', borderTop: '1px solid var(--border)' }}>
           <span style={{ fontFamily: 'var(--serif)', fontSize: '1rem', fontWeight: 400 }}>{t('total')}</span>
-          <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>${parseFloat(order.total).toFixed(2)}</span>
+          <span style={{ fontFamily: 'var(--serif)', fontSize: '1.2rem', fontWeight: 300 }}>€{parseFloat(order.total).toFixed(2)}</span>
         </div>
       </div>
 
