@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 async function apiFetch(path, options = {}) {
   const isFormData = options.body instanceof FormData;
