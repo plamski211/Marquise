@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { api } from '../lib/api';
+import { api, assetUrl } from '../lib/api';
 import { useLang } from '../context/LangContext';
 
 export default function OrderConfirmation() {
@@ -89,7 +89,7 @@ export default function OrderConfirmation() {
         {order.items.map((item) => (
           <div key={item.id} style={{ display: 'flex', gap: '16px', paddingBottom: '16px', borderBottom: '1px solid var(--border)' }}>
             {item.image ? (
-              <img src={item.image} alt="" style={{ width: '64px', height: '84px', objectFit: 'cover', flexShrink: 0, background: 'var(--bg-alt)' }} />
+              <img src={assetUrl(item.image)} alt="" style={{ width: '64px', height: '84px', objectFit: 'cover', flexShrink: 0, background: 'var(--bg-alt)' }} />
             ) : (
               <div style={{ width: '64px', height: '84px', flexShrink: 0, background: 'var(--bg-alt)' }} />
             )}

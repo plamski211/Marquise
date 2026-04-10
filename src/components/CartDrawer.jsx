@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useLang } from '../context/LangContext';
-import { api } from '../lib/api';
+import { api, assetUrl } from '../lib/api';
 
 export default function CartDrawer() {
   const { items, isOpen, setIsOpen, removeItem, updateQty, totalPrice } = useCart();
@@ -65,7 +65,7 @@ export default function CartDrawer() {
                     >
                       <div style={{ width: '80px', height: '104px', flexShrink: 0, overflow: 'hidden', background: 'var(--bg-alt)' }}>
                         {item.image ? (
-                          <img src={item.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          <img src={assetUrl(item.image)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                           <div style={{ width: '100%', height: '100%', background: item.gradient || 'var(--bg-alt)' }} />
                         )}

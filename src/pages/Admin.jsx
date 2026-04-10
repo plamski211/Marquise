@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useProducts } from '../context/ProductContext';
 import { useAuth } from '../context/AuthContext';
-import { api } from '../lib/api';
+import { api, assetUrl } from '../lib/api';
 
 const FALLBACK_GRADIENT = 'linear-gradient(145deg, #E8E2DA 0%, #D4CCC0 100%)';
 
@@ -495,7 +495,7 @@ export default function Admin() {
                             border: i === 0 ? '2px solid var(--accent)' : '1px solid var(--border)',
                             flexShrink: 0,
                           }}>
-                            <img src={img.type === 'new' ? URL.createObjectURL(img.file) : img.src} alt="" style={{
+                            <img src={img.type === 'new' ? URL.createObjectURL(img.file) : assetUrl(img.src)} alt="" style={{
                               width: '100%',
                               height: '100%',
                               objectFit: 'cover',
@@ -995,7 +995,7 @@ export default function Admin() {
                   flexShrink: 0,
                 }}>
                   {product.images?.[0] ? (
-                    <img src={product.images[0]} alt="" style={{
+                    <img src={assetUrl(product.images[0])} alt="" style={{
                       width: '100%',
                       height: '100%',
                       objectFit: 'cover',

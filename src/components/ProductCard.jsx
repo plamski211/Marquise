@@ -2,6 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useLang } from '../context/LangContext';
+import { assetUrl } from '../lib/api';
 
 export default function ProductCard({ product, index = 0 }) {
   const { t } = useLang();
@@ -52,7 +53,7 @@ export default function ProductCard({ product, index = 0 }) {
           {hasImage ? (
             <img
               ref={imgRef}
-              src={product.images[0]}
+              src={assetUrl(product.images[0])}
               alt={product.name}
               style={{
                 width: '100%',

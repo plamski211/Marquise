@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { useLang } from '../context/LangContext';
+import { assetUrl } from '../lib/api';
 import ProductCard from '../components/ProductCard';
 
 export default function ProductDetail() {
@@ -72,7 +73,7 @@ export default function ProductDetail() {
             background: 'var(--bg-alt)',
           }}>
             {hasImages ? (
-              <img src={product.images[activeImage]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={assetUrl(product.images[activeImage])} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <div style={{ width: '100%', height: '100%', background: product.gradient || '#F0EEEC' }} />
             )}
@@ -87,7 +88,7 @@ export default function ProductDetail() {
                   opacity: activeImage === i ? 1 : 0.5,
                   transition: 'opacity 0.2s ease',
                 }}>
-                  <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={assetUrl(img)} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </button>
               ))}
             </div>

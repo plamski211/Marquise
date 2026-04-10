@@ -1,5 +1,9 @@
 const API_BASE = import.meta.env.VITE_API_URL || '';
 
+export function assetUrl(path) {
+  return path ? `${API_BASE}${path}` : '';
+}
+
 async function apiFetch(path, options = {}) {
   const isFormData = options.body instanceof FormData;
   const config = {
